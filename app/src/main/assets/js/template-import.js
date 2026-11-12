@@ -22,7 +22,7 @@ function createPageWrap(page, index, editable) {
  const canvas = document.createElement('div'); canvas.className = 'template-page'; canvas.dataset.page = index;
  const img = new Image();
  img.onload = () => { canvas.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight; };
- img.src = pageImage(page); canvas.style.backgroundImage = 'url("' + img.src + '")';
+ img.className='template-source-image'; img.alt=''; img.src = pageImage(page); canvas.appendChild(img);
  const fields = (active.fields || []).filter(f => f.page === index);
  fields.forEach(field => {
    const el = document.createElement('div'); el.className = 'template-field' + (editable && selectedField === field.id ? ' selected' : '');
@@ -80,7 +80,7 @@ async function importFile(file) {
  if (file.size > 25*1024*1024) { alert('Choose a file smaller than 25 MB.'); return; }
  const ext=extOf(file);
  if (ext==='pdf' && file.type && file.type!=='application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { alert('Choose a PDF or image file.'); return; }
- if (ext!=='pdf' && !file.type.startsWith('image/')) { alert('Choose a PDF or image file.'); return; }
+ if (ext!=='pdf' && !['image/jpeg','image/png','image/webp'].includes(file.type) && !/\\.(jpe?g|png|webp)$/i.test(file.name)) { alert('Use a PDF, JPG, PNG or WebP image.'); return; }
  if (!native()) { alert('PDF/Image import requires the Android app.'); return; }
  try {
    const data=await dataUrl(file); const assetId=native().saveAsset(data,ext);
@@ -164,7 +164,7 @@ function removeField() { if(!selectedField)return;active.fields=active.fields.fi
 function edit(id) { const found=readTemplates().find(t=>t.id===id);if(!found)return;active=found;pdfPageCount=active.sourceType==='pdf'?native().pdfPageCount(active.sourceId):1;pageIndex=0;selectedField=null;mode='edit';openEditor(); }
 function fill(id) { const found=readTemplates().find(t=>t.id===id);if(!found)return;active=JSON.parse(JSON.stringify(found));active.fields.forEach(f=>f.value='');pageIndex=0;mode='fill';openEditor(); }
 function remove(id) { if(!confirm('Delete this saved template and its local source files?'))return;const list=readTemplates(),item=list.find(t=>t.id===id);if(item&&native()){native().deleteAsset(item.sourceId);item.pages.forEach(p=>native().deleteAsset(p.assetId));}writeTemplates(list.filter(t=>t.id!==id));renderSaved(); }
-function chooseFile() { const input=document.createElement('input');input.type='file';input.accept='application/pdf,image/*';input.onchange=()=>importFile(input.files?.[0]);input.click(); }
+function chooseFile() { const input=document.createElement('input');input.type='file';input.accept='application/pdf,image/jpeg,image/png,image/webp';input.onchange=()=>importFile(input.files?.[0]);input.click(); }
 $('fieldLabel').addEventListener('input',updateSelected);$('fieldType').addEventListener('change',updateSelected);
 window.TemplateStudio={chooseFile,addField,save,close,nextPage,removeField,edit,fill,remove};
 renderSaved();
