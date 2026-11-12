@@ -10,7 +10,7 @@ const writeTemplates = list => localStorage.setItem(STORE, JSON.stringify(list))
 const extOf = file => { const name = file.name.toLowerCase(); return name.endsWith('.pdf') || file.type === 'application/pdf' ? 'pdf' : (name.endsWith('.png') || file.type === 'image/png' ? 'png' : (name.endsWith('.webp') || file.type === 'image/webp' ? 'webp' : 'jpg')); };
 function dataUrl(file) { return new Promise((resolve,reject) => { const r = new FileReader(); r.onload = () => resolve(String(r.result)); r.onerror = reject; r.readAsDataURL(file); }); }
 function assetData(id) { const result = native()?.loadAsset(id); if (!result) throw new Error('Could not read the saved template file.'); return result; }
-function showHub() { $('templateHub').hidden = false; $('templateEditor').hidden = true; renderSaved(); }
+function showHub() { $('landing').style.display='block'; $('studio').style.display='none'; $('templateHub').hidden = false; $('templateEditor').hidden = true; renderSaved(); }
 function renderSaved() {
  const list = readTemplates();
  $('savedTemplates').innerHTML = list.length ? list.map(t => '<article class="saved-template"><h3>'+safe(t.name)+'</h3><p>'+safe(t.pages.length+' page(s) · '+t.fields.length+' fillable field(s)')+'</p><div class="saved-template-actions"><button onclick="TemplateStudio.fill(\''+t.id+'\')">Fill form</button><button onclick="TemplateStudio.edit(\''+t.id+'\')">Edit layout</button><button onclick="TemplateStudio.remove(\''+t.id+'\')">Delete</button></div></article>').join('') : '<p class="template-empty">No custom templates yet. Import a PDF or image to get started.</p>';
@@ -18,7 +18,7 @@ function renderSaved() {
 function pageImage(page) { return page.data || assetData(page.assetId); }
 function createPageWrap(page, index, editable) {
  const wrap = document.createElement('div'); wrap.className = 'template-page-wrap';
- const label = document.createElement('p'); label.className = 'template-page-label'; label.textContent = 'Page ' + (index + 1);
+ const label = document.createElement('p'); label.className = 'template-page-label'; label.textContent = 'Page ' + (index + 1) + (editable ? ' · tap to select' : ''); label.addEventListener('click', () => { if(editable){ pageIndex=index; renderEditor(); } });
  const canvas = document.createElement('div'); canvas.className = 'template-page'; canvas.dataset.page = index;
  const img = new Image();
  img.onload = () => { canvas.style.aspectRatio = img.naturalWidth + ' / ' + img.naturalHeight; };
@@ -127,14 +127,13 @@ function renderFillPages() {
  const old=document.querySelectorAll('#templatePages .template-page-wrap');old.forEach(n=>n.remove());
  active.pages.forEach((page,i)=>{
    const wrap=createPageWrap(page,i,false);const canvas=wrap.querySelector('.template-page');
-   active.fields.filter(f=>f.page===i).forEach(f=>{const el=document.createElement('div');el.className='template-field';el.style.cssText='left:'+f.x+'%;top:'+f.y+'%;width:'+f.w+'%;height:'+f.h+'%;border:0;background:transparent;color:#111;padding:0';el.textContent=f.value||'';canvas.appendChild(el);});
-   const wm=document.createElement('div');wm.className='template-watermark';wm.textContent='SAMPLE · NOT OFFICIAL';canvas.appendChild(wm);document.querySelector('#templatePages').appendChild(wrap);
+   document.querySelector('#templatePages').appendChild(wrap);
  });
 }
 function printFilled() {
  document.body.classList.add('template-print-mode');
- if (window.NativePrint?.printDocument) window.NativePrint.printDocument(); else window.print();
- setTimeout(()=>document.body.classList.remove('template-print-mode'),1500);
+ if (window.NativePrint?.printDocument) window.NativePrint.printDocument();
+ else { window.print(); document.body.classList.remove('template-print-mode'); }
 }
 function close() { $('templateEditor').hidden=true; $('landing').style.display='block';$('studio').style.display='none';showHub(); }
 function save() {
@@ -164,7 +163,7 @@ function addField() {
 function removeField() { if(!selectedField)return;active.fields=active.fields.filter(f=>f.id!==selectedField);selectedField=null;$('fieldLabel').value='';renderEditor(); }
 function edit(id) { const found=readTemplates().find(t=>t.id===id);if(!found)return;active=found;pdfPageCount=active.sourceType==='pdf'?native().pdfPageCount(active.sourceId):1;pageIndex=0;selectedField=null;mode='edit';openEditor(); }
 function fill(id) { const found=readTemplates().find(t=>t.id===id);if(!found)return;active=JSON.parse(JSON.stringify(found));active.fields.forEach(f=>f.value='');pageIndex=0;mode='fill';openEditor(); }
-function remove(id) { if(!confirm('Delete this saved template?'))return;writeTemplates(readTemplates().filter(t=>t.id!==id));renderSaved(); }
+function remove(id) { if(!confirm('Delete this saved template and its local source files?'))return;const list=readTemplates(),item=list.find(t=>t.id===id);if(item&&native()){native().deleteAsset(item.sourceId);item.pages.forEach(p=>native().deleteAsset(p.assetId));}writeTemplates(list.filter(t=>t.id!==id));renderSaved(); }
 function chooseFile() { const input=document.createElement('input');input.type='file';input.accept='application/pdf,image/*';input.onchange=()=>importFile(input.files?.[0]);input.click(); }
 $('fieldLabel').addEventListener('input',updateSelected);$('fieldType').addEventListener('change',updateSelected);
 window.TemplateStudio={chooseFile,addField,save,close,nextPage,removeField,edit,fill,remove};
