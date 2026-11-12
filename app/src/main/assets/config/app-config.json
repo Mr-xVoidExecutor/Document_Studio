@@ -15,7 +15,24 @@
   "appearance": {
     "theme": "light",
     "accent": "#10a37f",
-    "cardStyle": "floating-white"
+    "cardStyle": "floating-white",
+    "page": {
+      "size": "A4 portrait",
+      "padding": "18mm 17mm 16mm",
+      "overflow": "paginate"
+    },
+    "typography": {
+      "family": "Arial, sans-serif",
+      "titleSize": "20pt",
+      "bodySize": "10pt",
+      "labelSize": "8pt"
+    },
+    "layoutRules": {
+      "fieldSpacing": "consistent",
+      "longText": "wrap",
+      "tables": "keep-rows-together",
+      "printPreview": "same-styles"
+    }
   },
   "documents": [
     {
