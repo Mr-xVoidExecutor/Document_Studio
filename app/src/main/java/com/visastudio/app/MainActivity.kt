@@ -50,14 +50,18 @@ class MainActivity : AppCompatActivity() {
             ): Boolean {
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePath
-                val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "*/*"
-                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))
-                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
-                }
                 return try {
-                    startActivityForResult(Intent.createChooser(picker, "Choose a PDF or image"), fileChooserRequestCode)
+                    val selectionIntent = fileChooserParams?.createIntent()
+                        ?: Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "*/*"
+                            putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))
+                        }
+                    val chooser = Intent.createChooser(
+                        selectionIntent,
+                        fileChooserParams?.title?.toString()?.takeIf { it.isNotBlank() } ?: "Choose a PDF or image"
+                    )
+                    startActivityForResult(chooser, fileChooserRequestCode)
                     true
                 } catch (_: Exception) {
                     this@MainActivity.filePathCallback?.onReceiveValue(null)
@@ -128,7 +132,9 @@ class MainActivity : AppCompatActivity() {
         fun pdfPageCount(assetId: String): Int {
             return try {
                 val file = pdfFile(assetId) ?: return 0
-                PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)).use { it.pageCount }
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                    PdfRenderer(descriptor).use { renderer -> renderer.pageCount }
+                }
             } catch (_: Exception) { 0 }
         }
 
@@ -136,18 +142,23 @@ class MainActivity : AppCompatActivity() {
         fun renderPdfPage(assetId: String, pageIndex: Int): String {
             return try {
                 val file = pdfFile(assetId) ?: return ""
-                PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)).use { renderer ->
-                    if (pageIndex !in 0 until renderer.pageCount) return ""
-                    renderer.openPage(pageIndex).use { page ->
-                        val scale = minOf(2.5f, 2400f / page.width.toFloat(), 3200f / page.height.toFloat())
-                        val width = (page.width * scale).toInt().coerceAtLeast(1)
-                        val height = (page.height * scale).toInt().coerceAtLeast(1)
-                        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-                        val output = ByteArrayOutputStream()
-                        bitmap.compress(Bitmap.CompressFormat.JPEG, 88, output)
-                        bitmap.recycle()
-                        "data:image/jpeg;base64," + Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+                ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+                    PdfRenderer(descriptor).use { renderer ->
+                        if (pageIndex !in 0 until renderer.pageCount) return ""
+                        renderer.openPage(pageIndex).use { page ->
+                            val scale = minOf(2.5f, 2400f / page.width.toFloat(), 3200f / page.height.toFloat())
+                            val width = (page.width * scale).toInt().coerceAtLeast(1)
+                            val height = (page.height * scale).toInt().coerceAtLeast(1)
+                            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                            try {
+                                page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                                val output = ByteArrayOutputStream()
+                                bitmap.compress(Bitmap.CompressFormat.JPEG, 88, output)
+                                "data:image/jpeg;base64," + Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+                            } finally {
+                                bitmap.recycle()
+                            }
+                        }
                     }
                 }
             } catch (_: Exception) { "" }
@@ -179,7 +190,7 @@ class MainActivity : AppCompatActivity() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == fileChooserRequestCode) {
-            val result = if (resultCode == RESULT_OK) data?.data?.let { arrayOf(it) } else null
+            val result = if (resultCode == RESULT_OK) WebChromeClient.FileChooserParams.parseResult(resultCode, data) else null
             filePathCallback?.onReceiveValue(result)
             filePathCallback = null
         }
