@@ -25,7 +25,7 @@ function createPageWrap(page, index, editable) {
  img.className='template-source-image'; img.alt=''; img.src = pageImage(page); canvas.appendChild(img);
  const fields = (active.fields || []).filter(f => f.page === index);
  fields.forEach(field => {
-   const el = document.createElement('div'); el.className = 'template-field' + (editable && selectedField === field.id ? ' selected' : '');
+   const el = document.createElement('div'); el.className = 'template-field' + (editable && selectedField === field.id ? ' selected' : '') + (!editable ? ' filled-field' : '');
    el.style.left = field.x+'%'; el.style.top = field.y+'%'; el.style.width = field.w+'%'; el.style.height = field.h+'%';
    const value = document.createElement('span'); value.className = 'template-field-value'; value.textContent = editable ? (field.label || 'Text field') : (field.value || '');
    el.appendChild(value);
@@ -103,11 +103,12 @@ function openEditor() {
  $('templateModeTitle').textContent=mode==='edit'?'Template layout editor':'Fill template';
  $('templateName').value=active.name;
  $('templateName').disabled=mode!=='edit';
+ $('templateSettings').hidden=mode!=='edit'; $('templateToolbarAdd').hidden=mode!=='edit'; $('templateToolbarSave').hidden=mode!=='edit';
  $('fieldLabel').parentElement.hidden=mode!=='edit'; $('fieldType').parentElement.hidden=mode!=='edit';
  $('templateEditor').classList.toggle('fill-mode',mode==='fill');
  $('templatePages').innerHTML='';
- if (mode==='edit') { renderEditor(); $('templateHelp').textContent='Add a field, select it, then drag it into position. Resize using the green corner handle. For multi-page PDFs, load additional pages one at a time.'; }
- else { renderFillForm(); }
+ if (mode==='edit') { renderEditor(); $('templateHelp').textContent='Add a field, select it, then drag it into position. Resize using the green corner handle. Tap a page label to choose where new fields are placed.'; }
+ else { $('templateHelp').textContent='Complete the fields below. Your original page layout is retained; the output includes a SAMPLE · NOT OFFICIAL watermark.'; renderFillForm(); }
 }
 function renderFillForm() {
  const host=$('templatePages'); host.innerHTML='';
