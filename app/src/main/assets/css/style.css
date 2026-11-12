@@ -55,3 +55,6 @@
 }
 
 .template-source-image{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}.template-field{z-index:1}
+
+.template-field.filled-field{border:0;background:transparent;padding:0;color:#111}
+@media print{body.template-print-mode .template-fill{display:none!important}}
