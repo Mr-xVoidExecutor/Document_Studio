@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Official Visa & Migration Document Studio</title>
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #2563eb;
+            --bg-light: #f1f5f9;
+            --card-bg: #ffffff;
+            --border: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-light);
+            color: #1e293b;
+        }
+
+        /* ================= PAGE 1: LANDING DASHBOARD ================= */
+        #page-landing {
+            min-height: 100vh;
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .hero-header h1 {
+            font-size: 28px;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .hero-header p {
+            color: #64748b;
+            font-size: 15px;
+        }
+
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .doc-card {
+            background: var(--card-bg);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .doc-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px -5px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent);
+        }
+
+        .doc-badge {
+            display: inline-block;
+            background: #eff6ff;
+            color: var(--accent);
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .doc-card h3 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .doc-card p {
+            font-size: 13.5px;
+            color: #475569;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .btn-open {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 11px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13.5px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-open:hover {
+            background: var(--accent);
+        }
+
+        /* ================= PAGE 2: SPLIT STUDIO ================= */
+        #page-studio {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .studio-layout {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        .left-form {
+            width: 420px;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        .studio-topbar {
+            padding: 14px 18px;
+            background: var(--primary);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-back {
+            background: #334155;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .btn-back:hover {
+            background: #475569;
+        }
+
+        .form-fields-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 18px;
+        }
+
+        .f-sec {
+            background: #f1f5f9;
+            padding: 7px 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0f172a;
+            border-left: 3px solid var(--accent);
+            margin: 14px 0 10px 0;
+        }
+
+        .f-sec:first-child { margin-top: 0; }
+
+        .fg { margin-bottom: 11px; }
+        .fg label {
+            display: block;
+            font-size: 11.5px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+
+        .fg input, .fg select, .fg textarea {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .fg-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .studio-footer {
+            padding: 14px 18px;
+            background: #f8fafc;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-gen {
+            flex: 1;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-pdf {
+            flex: 1;
+            background: #059669;
+            color: #fff;
+            border: none;
+            padding: 11px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* ================= RIGHT PREVIEW & A4 PAPER ================= */
+        .right-preview {
+            flex: 1;
+            background: #64748b;
+            overflow-y: auto;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .a4-sheet {
+            width: 210mm;
+            min-height: 297mm;
+            background: #ffffff;
+            padding: 14mm 16mm;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative;
+            color: #000;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9.5pt;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+        }
+
+        .watermark-layer {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-25deg);
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+            max-width: 130mm;
+        }
+
+        .sheet-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Shared Official Elements */
+        .box-field {
+            border: 1px solid #000;
+            padding: 3px 6px;
+            font-weight: bold;
+            font-size: 8.5pt;
+            min-height: 20px;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.85);
+        }
+
+        .cb {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 12px;
+            height: 12px;
+            border: 1px solid #000;
+            font-size: 9pt;
+            font-weight: bold;
+            margin-right: 4px;
+        }
+
+        .sig-script {
+            font-family: 'Brush Script MT', cursive;
+            font-size: 18pt;
+            color: #000080;
+        }
+
+        .official-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 9pt;
+        }
+
+        .official-table th, .official-table td {
+            border: 1px solid #333;
+            padding: 6px 8px;
+            text-align: left;
+        }
+
+        .official-table th {
+            background: #f1f5f9;
+            width: 38%;
+        }
+
+        .a4-footer {
+            border-top: 1px solid #000;
+            padding-top: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 7.5pt;
+            font-weight: bold;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ================= PRINT RULES ================= */
+        @media print {
+            body { background: none; }
+            #page-landing, .left-form { display: none !important; }
+            #page-studio { display: block !important; height: auto; overflow: visible; }
+            .right-preview { padding: 0; background: none; display: block; }
+            .a4-sheet {
+                box-shadow: none;
+                margin: 0;
+                page-break-after: always;
+                break-after: page;
+            }
+            .a4-sheet:last-child { page-break-after: auto; }
+            @page { size: A4 portrait; margin: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ==================== PAGE 1: LANDING DASHBOARD ==================== -->
+    <div id="page-landing">
+        <div class="hero-header">
+            <h1>Document & Visa Application Studio</h1>
+            <p>যেকোনো একটি ডকুমেন্ট সিলেক্ট করুন, তথ্য দিন এবং সরাসরি অফিশিয়াল A4 PDF জেনারেট করুন</p>
+        </div>
+
+        <div class="doc-grid">
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">AUSTRALIA VISA FORM 1296</span>
+                    <h3>1. SubClass 482 Application</h3>
+                    <p>বাংলাদেশ থেকে অস্ট্রেলিয়া যাওয়ার জন্য সম্পূর্ণ ৪ পেজের অফিশিয়াল ওয়ার্ক পারমিট ভিসা আবেদন ফর্ম (ছবি ও স্বাক্ষরসহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('subclass482')">Open Form & Generate →</button>
+            </div>
+
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">RTS GROUP & COSTA GROUP</span>
+                    <h3>2. Job Offer Letter</h3>
+                    <p>অস্ট্রেলিয়ান কোম্পানি RTS Group অথবা Costa Group-এর অফিশিয়াল এমপ্লয়মেন্ট অফার লেটার (লোগো, স্যালারি ও সিলসহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('offerLetter')">Open Form & Generate →</button>
+            </div>
+
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">WORK AUTHORIZATION</span>
+                    <h3>3. Australian Work Permit</h3>
+                    <p>বাংলাদেশ থেকে অস্ট্রেলিয়ায় কাজের অনুমোদনের অফিশিয়াল ওয়ার্ক পারমিট সার্টিফিকেট (ছবি, লোগো ও ওয়াটারমার্কসহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('workPermit')">Open Form & Generate →</button>
+            </div>
+
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">DEPT. OF HOME AFFAIRS</span>
+                    <h3>4. Visa Grant Notice</h3>
+                    <p>অস্ট্রেলিয়ান ইমিগ্রেশন ডিপার্টমেন্টের অফিশিয়াল Subclass 482 ভিসা গ্রান্ট নোটিশ লেটার (Grant Number ও TRN সহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('visaGrant')">Open Form & Generate →</button>
+            </div>
+
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">IMMIGRATION HEALTH (HAP ID)</span>
+                    <h3>5. E-Medical Certificate</h3>
+                    <p>অস্ট্রেলিয়ান ভিসার জন্য ই-মেডিকেল রেফারেল ও হেলথ ক্লিয়ারেন্স ডকুমেন্ট (HAP ID ও পাসপোর্ট ছবিসহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('eMedical')">Open Form & Generate →</button>
+            </div>
+
+            <div class="doc-card">
+                <div>
+                    <span class="doc-badge">BANGLADESH POLICE</span>
+                    <h3>6. Police Clearance Certificate</h3>
+                    <p>গণপ্রজাতন্ত্রী বাংলাদেশ সরকারের পুলিশ ক্লিয়ারেন্স সার্টিফিকেট (সরকারি লোগো, ওয়াটারমার্ক ও স্বাক্ষরসহ)।</p>
+                </div>
+                <button class="btn-open" onclick="openDocument('policeClearance')">Open Form & Generate →</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== PAGE 2: DYNAMIC FORM & PREVIEW STUDIO ==================== -->
+    <div id="page-studio">
+        <div class="studio-layout">
+            <!-- Left Input Panel -->
+            <div class="left-form">
+                <div class="studio-topbar">
+                    <span id="studio-title" style="font-weight:600; font-size:14px;">Document Editor</span>
+                    <button class="btn-back" onclick="goBack()">← All Documents</button>
+                </div>
+
+                <div class="form-fields-area" id="dynamic-form-container">
+                    <!-- Dynamic Inputs Will Be Injected Here -->
+                </div>
+
+                <div class="studio-footer">
+                    <button class="btn-gen" onclick="renderCurrentDocument()">⚡ Generate Preview</button>
+                    <button class="btn-pdf" onclick="window.print()">🖨️ Save / Print PDF</button>
+                </div>
+            </div>
+
+            <!-- Right A4 Preview Panel -->
+            <div class="right-preview" id="preview-canvas">
+                <!-- A4 Sheets Will Be Injected Here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDocType = '';
+        let uploadedImages = {
+            photo: '',
+            logo: '',
+            watermark: '',
+            seal: ''
+        };
+
+        // Handle Image Uploads & Convert to DataURL
+        function handleImageUpload(input, key) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedImages[key] = e.target.result;
+                    renderCurrentDocument();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Navigation Functions
+        function openDocument(type) {
+            currentDocType = type;
+            uploadedImages = { photo: '', logo: '', watermark: '', seal: '' };
+            document.getElementById('page-landing').style.display = 'none';
+            document.getElementById('page-studio').style.display = 'block';
+            buildFormForDocument(type);
+            renderCurrentDocument();
+        }
+
+        function goBack() {
+            document.getElementById('page-studio').style.display = 'none';
+            document.getElementById('page-landing').style.display = 'block';
+        }
+
+        // Helper to get input value safely
+        function val(id) {
+            const el = document.getElementById(id);
+            return el ? el.value : '';
+        }
+
+        // ==================== 1. BUILD DYNAMIC INPUT FORMS ====================
+        function buildFormForDocument(type) {
+            const container = document.getElementById('dynamic-form-container');
+            const titleEl = document.getElementById('studio-title');
+
+            if (type === 'subclass482') {
+                titleEl.textContent = 'SubClass 482 Application';
+                container.innerHTML = `
+                    <div class="f-sec">Media & Photo</div>
+                    <div class="fg"><label>Applicant Passport Photo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'photo')"></div>
+
+                    <div class="f-sec">Part A: Personal & Passport Details</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>1. Family Name</label><input id="f_fname" value="FARUK"></div>
+                        <div class="fg"><label>1. Given Names</label><input id="f_gname" value="MD OMOR"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>2. Other Names?</label><select id="f_other_name"><option>No</option><option>Yes</option></select></div>
+                        <div class="fg"><label>3. Sex</label><select id="f_sex"><option>Male</option><option>Female</option></select></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>4. Date of Birth</label><input id="f_dob" value="22/11/2000"></div>
+                        <div class="fg"><label>6. Relationship</label><select id="f_rel"><option>Single</option><option>Married</option></select></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>5. Birth City</label><input id="f_bcity" value="NOAKHALI"></div>
+                        <div class="fg"><label>5. Birth Country</label><input id="f_bcountry" value="BANGLADESH"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>7. Passport Number</label><input id="f_pp" value="A06301514"></div>
+                        <div class="fg"><label>7. Nationality</label><input id="f_nat" value="BANGLADESHI"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>7. Issue Date</label><input id="f_pp_iss" value="28/12/2022"></div>
+                        <div class="fg"><label>7. Expiry Date</label><input id="f_pp_exp" value="27/12/2032"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>7. Issuing Authority</label><input id="f_pp_auth" value="DIP/DHAKA"></div>
+                        <div class="fg"><label>9. National ID No</label><input id="f_nid" value="467 3289 668"></div>
+                    </div>
+                    <div class="fg"><label>10. Usual Occupation</label><input id="f_occ" value="EMPLOYED / PRIVATE SERVICE"></div>
+                    <div class="fg"><label>11. Intended Employment</label><input id="f_emp" value="SKILLED WORK / GENERAL EMPLOYMENT"></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>13. English Test</label><select id="f_eng"><option>IELTS</option><option>PTE Academic</option><option>TOEFL iBT</option></select></div>
+                        <div class="fg"><label>13. Test Date</label><input id="f_eng_date" value="08/11/2026"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>13. Test Location</label><input id="f_eng_loc" value="DHAKA, BANGLADESH"></div>
+                        <div class="fg"><label>13. Reference Number</label><input id="f_eng_ref" value="24BD0148413MDOMORFARUK"></div>
+                    </div>
+                    <div class="fg"><label>14. Residential Address</label><textarea id="f_addr" rows="2">BAORKOT, WARD NO 02, SONAIMURI, JOYAG 3844, NOAKHALI, BANGLADESH</textarea></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>16. Mobile Number</label><input id="f_mob" value="+880 1613117902"></div>
+                        <div class="fg"><label>17. Email Address</label><input id="f_email" value="omor91873@gmail.com"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>19. Sufficient Funds?</label><select id="f_funds"><option>Yes</option><option>No</option></select></div>
+                        <div class="fg"><label>20. Return Ticket?</label><select id="f_ticket"><option>Yes</option><option>No</option></select></div>
+                    </div>
+
+                    <div class="f-sec">Part B: Health & Part C: Signature</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>29. Health Insurance?</label><select id="f_ins"><option>Yes</option><option>No</option></select></div>
+                        <div class="fg"><label>30. Health Exam (12m)?</label><select id="f_exam"><option>No</option><option>Yes</option></select></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Applicant Signature</label><input id="f_sig" value="Md Omor Faruk"></div>
+                        <div class="fg"><label>Declaration Date</label><input id="f_sdate" value="08/11/2026"></div>
+                    </div>
+                `;
+            }
+
+            else if (type === 'offerLetter') {
+                titleEl.textContent = 'Job Offer Letter (RTS / Costa)';
+                container.innerHTML = `
+                    <div class="f-sec">Company & Branding Uploads</div>
+                    <div class="fg">
+                        <label>Select Australian Company</label>
+                        <select id="ol_comp" onchange="renderCurrentDocument()">
+                            <option value="RTS Group Australia Pty Ltd">RTS Group Australia Pty Ltd</option>
+                            <option value="Costa Group Holdings Ltd">Costa Group Holdings Ltd (Australia)</option>
+                        </select>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Company Logo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'logo')"></div>
+                        <div class="fg"><label>Watermark / Seal</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'watermark')"></div>
+                    </div>
+
+                    <div class="f-sec">Candidate & Offer Details</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Offer Reference No</label><input id="ol_ref" value="AUS/EMP/2026/8841"></div>
+                        <div class="fg"><label>Issue Date</label><input id="ol_date" value="10/11/2026"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Candidate Full Name</label><input id="ol_name" value="MD OMOR FARUK"></div>
+                        <div class="fg"><label>Passport Number</label><input id="ol_pp" value="A06301514"></div>
+                    </div>
+                    <div class="fg"><label>Candidate Address</label><input id="ol_addr" value="SONAIMURI, NOAKHALI, BANGLADESH"></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Job Position / Role</label><input id="ol_role" value="SKILLED AGRICULTURAL & PACKING OPERATOR"></div>
+                        <div class="fg"><label>Work Location</label><input id="ol_loc" value="MELBOURNE, VICTORIA, AUSTRALIA"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Salary Package (AUD)</label><input id="ol_sal" value="$73,150 AUD / Year ($36.50/hr)"></div>
+                        <div class="fg"><label>Working Hours</label><input id="ol_hrs" value="38 Hours / Week (Full-Time)"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Commencement Date</label><input id="ol_start" value="15/01/2027"></div>
+                        <div class="fg"><label>HR Manager Signature</label><input id="ol_hr" value="David Henderson"></div>
+                    </div>
+                `;
+            }
+
+            else if (type === 'workPermit') {
+                titleEl.textContent = 'Australian Work Permit';
+                container.innerHTML = `
+                    <div class="f-sec">Official Images & Logos</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Applicant Photo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'photo')"></div>
+                        <div class="fg"><label>Gov / Authority Logo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'logo')"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Background Watermark</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'watermark')"></div>
+                        <div class="fg"><label>Official Stamp / QR</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'seal')"></div>
+                    </div>
+
+                    <div class="f-sec">Permit & Worker Details</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Work Permit Number</label><input id="wp_num" value="WP-AUS-482-994021"></div>
+                        <div class="fg"><label>Approval Date</label><input id="wp_date" value="12/11/2026"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Worker Full Name</label><input id="wp_name" value="MD OMOR FARUK"></div>
+                        <div class="fg"><label>Date of Birth</label><input id="wp_dob" value="22/11/2000"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Passport Number</label><input id="wp_pp" value="A06301514"></div>
+                        <div class="fg"><label>Nationality</label><input id="wp_nat" value="BANGLADESHI"></div>
+                    </div>
+                    <div class="fg"><label>Approved Sponsor / Employer</label><input id="wp_emp" value="COSTA GROUP HOLDINGS LTD (ABN 68 151 363 129)"></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Nominated Occupation</label><input id="wp_occ" value="SKILLED WORKER (SUBCLASS 482)"></div>
+                        <div class="fg"><label>Permit Validity</label><input id="wp_val" value="4 YEARS (UNTIL 12/11/2030)"></div>
+                    </div>
+                `;
+            }
+
+            else if (type === 'visaGrant') {
+                titleEl.textContent = 'Australian Visa Grant Notice';
+                container.innerHTML = `
+                    <div class="f-sec">Official Branding</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Australian Gov Crest</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'logo')"></div>
+                        <div class="fg"><label>Watermark Image</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'watermark')"></div>
+                    </div>
+
+                    <div class="f-sec">Grant & Applicant Information</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Visa Grant Number</label><input id="vg_num" value="2048917364512"></div>
+                        <div class="fg"><label>Transaction Ref (TRN)</label><input id="vg_trn" value="EGO89K42LP"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Applicant Name</label><input id="vg_name" value="MD OMOR FARUK"></div>
+                        <div class="fg"><label>Date of Birth</label><input id="vg_dob" value="22 NOVEMBER 2000"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Passport Number</label><input id="vg_pp" value="A06301514"></div>
+                        <div class="fg"><label>Date of Grant</label><input id="vg_date" value="13 NOVEMBER 2026"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Must Not Arrive After</label><input id="vg_arrive" value="13 NOVEMBER 2030"></div>
+                        <div class="fg"><label>Sponsoring Employer</label><input id="vg_spon" value="RTS GROUP AUSTRALIA PTY LTD"></div>
+                    </div>
+                    <div class="fg"><label>Visa Conditions</label><input id="vg_cond" value="8607 - Approved work only; 8501 - Maintain health insurance"></div>
+                `;
+            }
+
+            else if (type === 'eMedical') {
+                titleEl.textContent = 'E-Medical Health Examination';
+                container.innerHTML = `
+                    <div class="f-sec">Photo & Medical Logo</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Applicant Photo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'photo')"></div>
+                        <div class="fg"><label>Department / Clinic Logo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'logo')"></div>
+                    </div>
+
+                    <div class="f-sec">HAP ID & Examination Details</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>HAP ID</label><input id="em_hap" value="58492014"></div>
+                        <div class="fg"><label>Examination Date</label><input id="em_date" value="05/11/2026"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Full Name</label><input id="em_name" value="MD OMOR FARUK"></div>
+                        <div class="fg"><label>Date of Birth</label><input id="em_dob" value="22/11/2000"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Passport Number</label><input id="em_pp" value="A06301514"></div>
+                        <div class="fg"><label>Gender</label><input id="em_sex" value="MALE"></div>
+                    </div>
+                    <div class="fg"><label>Panel Clinic Name</label><input id="em_clinic" value="IOM MIGRATION HEALTH ASSESSMENT CENTRE, DHAKA"></div>
+                    <div class="fg"><label>Required Examinations</label><input id="em_tests" value="501 Medical Examination, 502 Chest X-ray, 707 HIV Test"></div>
+                    <div class="fg"><label>Health Clearance Status</label><input id="em_status" value="HEALTH REQUIREMENT MET - CLEARED"></div>
+                `;
+            }
+
+            else if (type === 'policeClearance') {
+                titleEl.textContent = 'Bangladesh Police Clearance';
+                container.innerHTML = `
+                    <div class="f-sec">Govt Logo, Watermark & Seal</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Bangladesh Govt Logo</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'logo')"></div>
+                        <div class="fg"><label>Background Watermark</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'watermark')"></div>
+                    </div>
+                    <div class="fg"><label>QR Code / Official Seal</label><input type="file" accept="image/*" onchange="handleImageUpload(this, 'seal')"></div>
+
+                    <div class="f-sec">Applicant & Verification Details</div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Reference No</label><input id="pc_ref" value="PCC-2026-8841209"></div>
+                        <div class="fg"><label>Issue Date</label><input id="pc_date" value="02/11/2026"></div>
+                    </div>
+                    <div class="fg"><label>Police Station / District</label><input id="pc_ps" value="SONAIMURI POLICE STATION, DISTRICT: NOAKHALI"></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Applicant Full Name</label><input id="pc_name" value="MD OMOR FARUK"></div>
+                        <div class="fg"><label>Father's Name</label><input id="pc_father" value="MD ABUL KALAM"></div>
+                    </div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Passport Number</label><input id="pc_pp" value="A06301514"></div>
+                        <div class="fg"><label>Passport Issue Date</label><input id="pc_pp_date" value="28/12/2022"></div>
+                    </div>
+                    <div class="fg"><label>Permanent / Present Address</label><textarea id="pc_addr" rows="2">VILL: BAORKOT, WARD NO-02, P.O: JOYAG-3844, P.S: SONAIMURI, DIST: NOAKHALI, BANGLADESH</textarea></div>
+                    <div class="fg-row">
+                        <div class="fg"><label>Officer-in-Charge (OC)</label><input id="pc_oc" value="Officer-in-Charge, Sonaimuri PS"></div>
+                        <div class="fg"><label>Superintendent of Police</label><input id="pc_sp" value="Superintendent of Police, Noakhali"></div>
+                    </div>
+                `;
+            }
+        }
+
+        // ==================== 2. RENDER EXACT A4 PDF DOCUMENTS ====================
+        function renderCurrentDocument() {
+            const canvas = document.getElementById('preview-canvas');
+            const wmHtml = uploadedImages.watermark ? `<img src="${uploadedImages.watermark}" class="watermark-layer">` : '';
+            const logoHtml = uploadedImages.logo ? `<img src="${uploadedImages.logo}" style="max-height:65px; max-width:160px; object-fit:contain;">` : '';
+            const photoHtml = uploadedImages.photo ? `<img src="${uploadedImages.photo}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:8pt; color:#666;">PHOTO</span>';
+            const sealHtml = uploadedImages.seal ? `<img src="${uploadedImages.seal}" style="max-height:75px; max-width:75px; object-fit:contain;">` : '<div style="width:65px; height:65px; border:1px dashed #666; display:flex; align-items:center; justify-content:center; font-size:7pt;">QR / SEAL</div>';
+
+            // ------------------ 1. SUBCLASS 482 (4 PAGES) ------------------
+            if (currentDocType === 'subclass482') {
+                canvas.innerHTML = `
+                <!-- PAGE 1 -->
+                <div class="a4-sheet">
+                    <div class="sheet-content">
+                        <div style="display:flex; justify-content:space-between; border-bottom:2px solid #000; padding-bottom:8px; margin-bottom:10px;">
+                            <div>
+                                <div style="font-size:15pt; font-weight:bold;">Application for a Work Permit</div>
+                                <div style="font-size:12pt; font-weight:bold;">Visa Sub Class 482</div>
+                                <div style="font-size:7.5pt; margin-top:6px;">Either type (in English) in the fields provided or print this form and complete it using BLOCK LETTERS. Tick where applicable <b>✓</b></div>
+                            </div>
+                            <div style="display:flex; gap:12px;">
+                                <div style="text-align:right;">
+                                    <div style="font-weight:bold; font-size:10pt;">Australian Government</div>
+                                    <div style="font-size:8.5pt;">Department of Home Affairs</div>
+                                </div>
+                                <div style="width:32mm; height:40mm; border:1px solid #000; display:flex; align-items:center; justify-content:center;">${photoHtml}</div>
+                            </div>
+                        </div>
+
+                        <div style="background:#000; color:#fff; font-weight:bold; padding:4px 8px; margin-bottom:8px;">Part A - Your details</div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                            <div>
+                                <p style="font-weight:bold; margin-bottom:3px;">1. Full name (as on passport)</p>
+                                <div style="font-size:7.5pt;">Family name</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_fname')}</div>
+                                <div style="font-size:7.5pt;">Given names</div>
+                                <div class="box-field" style="margin-bottom:8px;">${val('f_gname')}</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">2. Known by any other names?</p>
+                                <div style="margin-bottom:8px;"><span class="cb">${val('f_other_name')==='No'?'✓':''}</span>No &nbsp;&nbsp; <span class="cb">${val('f_other_name')==='Yes'?'✓':''}</span>Yes</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">3. Sex</p>
+                                <div style="margin-bottom:8px;"><span class="cb">${val('f_sex')==='Male'?'✓':''}</span>Male &nbsp;&nbsp; <span class="cb">${val('f_sex')==='Female'?'✓':''}</span>Female</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">4. Date of birth</p>
+                                <div class="box-field" style="margin-bottom:8px;">${val('f_dob')}</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">5. Place of birth</p>
+                                <div style="font-size:7.5pt;">Town/city</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_bcity')}</div>
+                                <div style="font-size:7.5pt;">Country</div>
+                                <div class="box-field" style="margin-bottom:8px;">${val('f_bcountry')}</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">6. Relationship status</p>
+                                <div><span class="cb">${val('f_rel')==='Single'?'✓':''}</span>Single &nbsp;&nbsp; <span class="cb">${val('f_rel')==='Married'?'✓':''}</span>Married</div>
+                            </div>
+
+                            <div>
+                                <p style="font-weight:bold; margin-bottom:3px;">7. Details from your passport</p>
+                                <div style="font-size:7.5pt;">Passport number</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_pp')}</div>
+                                <div style="font-size:7.5pt;">Country of passport</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_bcountry')}</div>
+                                <div style="font-size:7.5pt;">Nationality</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_nat')}</div>
+                                <div style="font-size:7.5pt;">Date of issue</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_pp_iss')}</div>
+                                <div style="font-size:7.5pt;">Date of expiry</div>
+                                <div class="box-field" style="margin-bottom:4px;">${val('f_pp_exp')}</div>
+                                <div style="font-size:7.5pt;">Issuing authority</div>
+                                <div class="box-field" style="margin-bottom:8px;">${val('f_pp_auth')}</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">8. Other citizenship?</p>
+                                <div style="margin-bottom:8px;"><span class="cb">✓</span>No &nbsp;&nbsp; <span class="cb"></span>Yes</div>
+
+                                <p style="font-weight:bold; margin-bottom:3px;">9. National Identity Number</p>
+                                <div class="box-field">${val('f_nid')} (${val('f_bcountry')})</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>1296 (Design date 10/21)</span><span>COMMONWEALTH OF AUSTRALIA, 2026</span><span>Page 1</span></div>
+                </div>
+
+                <!-- PAGE 2 -->
+                <div class="a4-sheet">
+                    <div class="sheet-content" style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                        <div>
+                            <p style="font-weight:bold; margin-bottom:3px;">10. Usual occupation</p>
+                            <div class="box-field" style="margin-bottom:10px;">${val('f_occ')}</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">11. Intended employment in Australia</p>
+                            <div class="box-field" style="margin-bottom:10px;">${val('f_emp')}</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">12. Qualifications</p>
+                            <div class="box-field" style="margin-bottom:10px;">N/A</div>
+
+                            <p style="font-weight:bold; margin-bottom:4px;">13. English language proficiency</p>
+                            <div style="margin-bottom:6px;"><span class="cb">✓</span>Undertaken English test within last 12 months</div>
+                            <div style="margin-left:12px; margin-bottom:6px;">
+                                <div><span class="cb">${val('f_eng')==='IELTS'?'✓':''}</span>IELTS</div>
+                                <div><span class="cb">${val('f_eng')==='PTE Academic'?'✓':''}</span>PTE Academic</div>
+                                <div><span class="cb">${val('f_eng')==='TOEFL iBT'?'✓':''}</span>TOEFL iBT</div>
+                            </div>
+                            <div style="font-size:7.5pt;">Date of test</div>
+                            <div class="box-field" style="margin-bottom:4px;">${val('f_eng_date')}</div>
+                            <div style="font-size:7.5pt;">Test location</div>
+                            <div class="box-field" style="margin-bottom:4px;">${val('f_eng_loc')}</div>
+                            <div style="font-size:7.5pt;">Test reference number</div>
+                            <div class="box-field">${val('f_eng_ref')}</div>
+                        </div>
+
+                        <div>
+                            <p style="font-weight:bold; margin-bottom:3px;">14. Current residential address</p>
+                            <div class="box-field" style="min-height:40px; margin-bottom:8px;">${val('f_addr')}</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">15. Address for correspondence</p>
+                            <div class="box-field" style="margin-bottom:8px;">AS ABOVE</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">16. Mobile/cell number</p>
+                            <div class="box-field" style="margin-bottom:8px;">${val('f_mob')}</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">17. Email communication agreement</p>
+                            <div style="margin-bottom:4px;"><span class="cb"></span>No &nbsp;&nbsp; <span class="cb">✓</span>Yes</div>
+                            <div class="box-field" style="text-transform:lowercase; margin-bottom:8px;">${val('f_email')}</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">19. Sufficient funds for initial stay?</p>
+                            <div style="margin-bottom:8px;"><span class="cb">${val('f_funds')==='No'?'✓':''}</span>No &nbsp;&nbsp; <span class="cb">${val('f_funds')==='Yes'?'✓':''}</span>Yes</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">20. Return or onward ticket funds?</p>
+                            <div style="margin-bottom:8px;"><span class="cb">${val('f_ticket')==='No'?'✓':''}</span>No &nbsp;&nbsp; <span class="cb">${val('f_ticket')==='Yes'?'✓':''}</span>Yes</div>
+
+                            <p style="font-weight:bold; margin-bottom:3px;">21. Accompanying dependent children?</p>
+                            <div><span class="cb">✓</span>No &nbsp;&nbsp; <span class="cb"></span>Yes</div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>1296 (Design date 10/21)</span><span>COMMONWEALTH OF AUSTRALIA, 2026</span><span>Page 2</span></div>
+                </div>
+
+                <!-- PAGE 3 & 4 COMBINED SUMMARY FOR CLEAN EXPORT -->
+                <div class="a4-sheet">
+                    <div class="sheet-content">
+                        <div style="background:#000; color:#fff; font-weight:bold; padding:4px 8px; margin-bottom:8px;">Part B - Health & Part C - Signatures</div>
+                        <table class="official-table">
+                            <tr><th>22-25. Travel, Hospital, Medical or Childcare Work</th><td><span class="cb">✓</span> No</td></tr>
+                            <tr><th>26-28. Tuberculosis, Major Illness or Mobility Care</th><td><span class="cb">✓</span> No</td></tr>
+                            <tr><th>29. Hold health insurance for stay in Australia?</th><td><span class="cb">${val('f_ins')==='Yes'?'✓':''}</span> Yes &nbsp; <span class="cb">${val('f_ins')==='No'?'✓':''}</span> No</td></tr>
+                            <tr><th>30. Health examination in last 12 months?</th><td><span class="cb">${val('f_exam')==='Yes'?'✓':''}</span> Yes &nbsp; <span class="cb">${val('f_exam')==='No'?'✓':''}</span> No</td></tr>
+                        </table>
+
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;">
+                            <div style="border:1px solid #000; padding:10px;">
+                                <p style="font-weight:bold; margin-bottom:6px;">31. BIOMETRICS & AUSTRALIAN VALUES</p>
+                                <p style="font-size:8pt; line-height:1.4; margin-bottom:12px;">I consent to the collection of my fingerprints and facial image and confirm I have read and respect Australian society and values.</p>
+                                <div style="font-size:7.5pt;">Signature of applicant</div>
+                                <div style="border:1px solid #000; height:38px; display:flex; align-items:center; justify-content:center; margin-bottom:6px;" class="sig-script">${val('f_sig')}</div>
+                                <div style="font-size:7.5pt;">Date</div>
+                                <div class="box-field">${val('f_sdate')}</div>
+                            </div>
+                            <div style="border:1px solid #000; padding:10px;">
+                                <p style="font-weight:bold; margin-bottom:6px;">32. DECLARATION</p>
+                                <p style="font-size:8pt; line-height:1.4; margin-bottom:12px;">WARNING: Giving false or misleading information is a serious offence. I declare that the information on this form is complete, correct and up-to-date.</p>
+                                <div style="font-size:7.5pt;">Signature of applicant</div>
+                                <div style="border:1px solid #000; height:38px; display:flex; align-items:center; justify-content:center; margin-bottom:6px;" class="sig-script">${val('f_sig')}</div>
+                                <div style="font-size:7.5pt;">Date</div>
+                                <div class="box-field">${val('f_sdate')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>1296 (Design date 10/21)</span><span>COMMONWEALTH OF AUSTRALIA, 2026</span><span>Page 3-4</span></div>
+                </div>
+                `;
+            }
+
+            // ------------------ 2. JOB OFFER LETTER ------------------
+            else if (currentDocType === 'offerLetter') {
+                const comp = val('ol_comp');
+                const isCosta = comp.includes('Costa');
+                const brandColor = isCosta ? '#15803d' : '#1e3a8a';
+                const compAddr = isCosta ? 'Unit 1, 275 Robinsons Road, Ravenhall VIC 3023, Australia' : 'Level 4, 150 Collins Street, Melbourne VIC 3000, Australia';
+
+                canvas.innerHTML = `
+                <div class="a4-sheet">
+                    ${wmHtml}
+                    <div class="sheet-content">
+                        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:3px solid ${brandColor}; padding-bottom:12px; margin-bottom:18px;">
+                            <div>
+                                <div style="font-size:17pt; font-weight:bold; color:${brandColor};">${comp}</div>
+                                <div style="font-size:8.5pt; color:#475569;">${compAddr}</div>
+                            </div>
+                            <div>${logoHtml}</div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; margin-bottom:16px; font-size:9.5pt;">
+                            <div><b>Ref No:</b> ${val('ol_ref')}</div>
+                            <div><b>Date:</b> ${val('ol_date')}</div>
+                        </div>
+
+                        <div style="margin-bottom:16px; line-height:1.5;">
+                            <b>To,</b><br>
+                            <b>${val('ol_name')}</b><br>
+                            Passport No: <b>${val('ol_pp')}</b><br>
+                            Address: ${val('ol_addr')}
+                        </div>
+
+                        <div style="font-size:11.5pt; font-weight:bold; text-decoration:underline; margin-bottom:14px; color:${brandColor};">
+                            SUBJECT: LETTER OF EMPLOYMENT OFFER (SUBCLASS 482 SPONSORSHIP)
+                        </div>
+
+                        <p style="line-height:1.6; margin-bottom:12px;">
+                            Dear <b>${val('ol_name')}</b>,<br><br>
+                            Following our review of your qualifications and interview assessment, <b>${comp}</b> is pleased to offer you full-time employment in Australia under the Temporary Skill Shortage (Subclass 482) visa program on the following terms and conditions:
+                        </p>
+
+                        <table class="official-table">
+                            <tr><th>Position / Job Title</th><td><b>${val('ol_role')}</b></td></tr>
+                            <tr><th>Employer / Sponsor</th><td>${comp}</td></tr>
+                            <tr><th>Place of Employment</th><td>${val('ol_loc')}</td></tr>
+                            <tr><th>Remuneration / Salary</th><td><b>${val('ol_sal')}</b> + Superannuation (11.5%)</td></tr>
+                            <tr><th>Working Hours</th><td>${val('ol_hrs')}</td></tr>
+                            <tr><th>Expected Start Date</th><td>${val('ol_start')} (Subject to Visa Grant)</td></tr>
+                        </table>
+
+                        <p style="line-height:1.55; margin:14px 0;">
+                            Your employment will be governed by the Australian Fair Work Act 2009 and applicable workplace health and safety standards. Please sign below to confirm your acceptance of this offer.
+                        </p>
+
+                        <div style="display:flex; justify-content:space-between; margin-top:35px;">
+                            <div style="width:45%;">
+                                <div class="sig-script" style="border-bottom:1px solid #000; padding-bottom:4px;">${val('ol_hr')}</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>${val('ol_hr')}</b><br>Human Resources Director<br>${comp}</div>
+                            </div>
+                            <div style="width:45%;">
+                                <div class="sig-script" style="border-bottom:1px solid #000; padding-bottom:4px;">${val('ol_name')}</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>Accepted by Candidate:</b><br>${val('ol_name')}<br>Passport: ${val('ol_pp')}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>${comp}</span><span>CONFIDENTIAL EMPLOYMENT OFFER</span><span>Page 1 of 1</span></div>
+                </div>
+                `;
+            }
+
+            // ------------------ 3. WORK PERMIT ------------------
+            else if (currentDocType === 'workPermit') {
+                canvas.innerHTML = `
+                <div class="a4-sheet" style="border:6px double #1e3a8a; padding:12mm;">
+                    ${wmHtml}
+                    <div class="sheet-content">
+                        <div style="text-align:center; border-bottom:2px solid #1e3a8a; padding-bottom:12px; margin-bottom:16px;">
+                            ${logoHtml}
+                            <div style="font-size:11pt; font-weight:bold; letter-spacing:1px; margin-top:6px;">COMMONWEALTH OF AUSTRALIA</div>
+                            <div style="font-size:16pt; font-weight:bold; color:#1e3a8a; margin-top:2px;">OFFICIAL WORK PERMIT & NOMINATION APPROVAL</div>
+                            <div style="font-size:9pt; color:#475569;">Temporary Skill Shortage (Subclass 482) Employment Authorization</div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <div>
+                                <div style="font-size:10pt;"><b>Permit Number:</b> <span style="color:#b91c1c; font-weight:bold;">${val('wp_num')}</span></div>
+                                <div style="font-size:10pt; margin-top:4px;"><b>Date of Issue:</b> ${val('wp_date')}</div>
+                                <div style="font-size:10pt; margin-top:4px;"><b>Status:</b> <span style="background:#dcfce7; color:#166534; padding:2px 8px; font-weight:bold;">APPROVED & ACTIVE</span></div>
+                            </div>
+                            <div style="width:32mm; height:40mm; border:1.5px solid #000;">${photoHtml}</div>
+                        </div>
+
+                        <table class="official-table">
+                            <tr><th>Full Name of Worker</th><td><b>${val('wp_name')}</b></td></tr>
+                            <tr><th>Date of Birth</th><td>${val('wp_dob')}</td></tr>
+                            <tr><th>Passport Number</th><td><b>${val('wp_pp')}</b></td></tr>
+                            <tr><th>Nationality</th><td>${val('wp_nat')}</td></tr>
+                            <tr><th>Approved Sponsor / Company</th><td><b>${val('wp_emp')}</b></td></tr>
+                            <tr><th>Nominated Occupation</th><td>${val('wp_occ')}</td></tr>
+                            <tr><th>Authorized Validity Period</th><td>${val('wp_val')}</td></tr>
+                        </table>
+
+                        <p style="font-size:9pt; line-height:1.55; margin:16px 0; text-align:justify;">
+                            This document certifies that the above-named foreign national has been granted official employment authorization to enter and work in Australia for the approved sponsor listed above in accordance with the Migration Regulations 1994.
+                        </p>
+
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:35px;">
+                            <div>${sealHtml}</div>
+                            <div style="text-align:center; width:220px;">
+                                <div class="sig-script" style="border-bottom:1px solid #000;">Authorized Delegate</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>Authorized Signatory</b><br>Employment & Visa Operations<br>Canberra ACT, Australia</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>REF: ${val('wp_num')}</span><span>VERIFIED ELECTRONIC RECORD</span><span>Page 1 of 1</span></div>
+                </div>
+                `;
+            }
+
+            // ------------------ 4. VISA GRANT NOTICE ------------------
+            else if (currentDocType === 'visaGrant') {
+                canvas.innerHTML = `
+                <div class="a4-sheet">
+                    ${wmHtml}
+                    <div class="sheet-content">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #000; padding-bottom:10px; margin-bottom:16px;">
+                            <div>
+                                <div style="font-size:13pt; font-weight:bold;">Australian Government</div>
+                                <div style="font-size:10.5pt;">Department of Home Affairs</div>
+                            </div>
+                            <div>${logoHtml}</div>
+                        </div>
+
+                        <div style="font-size:13pt; font-weight:bold; margin-bottom:12px;">
+                            NOTIFICATION OF GRANT OF A TEMPORARY SKILL SHORTAGE (SUBCLASS 482) VISA
+                        </div>
+
+                        <p style="line-height:1.5; margin-bottom:14px;">
+                            Dear <b>${val('vg_name')}</b>,<br><br>
+                            We are pleased to advise that your application for a Temporary Skill Shortage (Subclass 482) visa has been <b>GRANTED</b> on <b>${val('vg_date')}</b>.
+                        </p>
+
+                        <table class="official-table">
+                            <tr><th>Applicant Name</th><td><b>${val('vg_name')}</b></td></tr>
+                            <tr><th>Date of Birth</th><td>${val('vg_dob')}</td></tr>
+                            <tr><th>Passport Number</th><td><b>${val('vg_pp')}</b></td></tr>
+                            <tr><th>Visa Grant Number</th><td><b>${val('vg_num')}</b></td></tr>
+                            <tr><th>Transaction Reference Number (TRN)</th><td>${val('vg_trn')}</td></tr>
+                            <tr><th>Approved Sponsor</th><td>${val('vg_spon')}</td></tr>
+                            <tr><th>Travel Facility</th><td>Multiple Entries</td></tr>
+                            <tr><th>Must Not Arrive After</th><td><b>${val('vg_arrive')}</b></td></tr>
+                            <tr><th>Visa Conditions</th><td>${val('vg_cond')}</td></tr>
+                        </table>
+
+                        <div style="background:#f8fafc; border:1px solid #cbd5e1; padding:10px; font-size:8.5pt; line-height:1.45; margin-top:14px;">
+                            <b>Important Information:</b><br>
+                            Your visa is linked electronically to your current passport number (<b>${val('vg_pp')}</b>). Please carry a printed copy of this Visa Grant Notice when travelling to Australia.
+                        </div>
+
+                        <div style="margin-top:28px;">
+                            Yours sincerely,<br><br>
+                            <div class="sig-script">Delegate of the Minister</div>
+                            <b>Position Number: 60049182</b><br>
+                            Department of Home Affairs, Australian Government
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>VGN: ${val('vg_num')}</span><span>© COMMONWEALTH OF AUSTRALIA</span><span>Page 1 of 1</span></div>
+                </div>
+                `;
+            }
+
+            // ------------------ 5. E-MEDICAL CERTIFICATE ------------------
+            else if (currentDocType === 'eMedical') {
+                canvas.innerHTML = `
+                <div class="a4-sheet">
+                    <div class="sheet-content">
+                        <div style="display:flex; justify-content:space-between; align-items:center; background:#0f172a; color:#fff; padding:12px 16px; margin-bottom:16px;">
+                            <div>
+                                <div style="font-size:14pt; font-weight:bold;">eMedical - Immigration Health Examination</div>
+                                <div style="font-size:8.5pt; color:#cbd5e1;">Australian Department of Home Affairs Health Assessment</div>
+                            </div>
+                            <div>${logoHtml}</div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; align-items:center; border:1px solid #000; padding:10px; margin-bottom:16px;">
+                            <div>
+                                <div style="font-size:9pt; color:#475569;">HEALTH CASE IDENTIFIER (HAP ID)</div>
+                                <div style="font-size:18pt; font-weight:bold; letter-spacing:2px;">${val('em_hap')}</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>Assessment Date:</b> ${val('em_date')}</div>
+                            </div>
+                            <div style="width:30mm; height:38mm; border:1px solid #000;">${photoHtml}</div>
+                        </div>
+
+                        <table class="official-table">
+                            <tr><th>Client Full Name</th><td><b>${val('em_name')}</b></td></tr>
+                            <tr><th>Date of Birth</th><td>${val('em_dob')}</td></tr>
+                            <tr><th>Gender</th><td>${val('em_sex')}</td></tr>
+                            <tr><th>Passport Number</th><td><b>${val('em_pp')}</b></td></tr>
+                            <tr><th>Panel Clinic / Hospital</th><td>${val('em_clinic')}</td></tr>
+                            <tr><th>Examinations Completed</th><td>${val('em_tests')}</td></tr>
+                            <tr><th>Final Health Outcome</th><td><b style="color:#15803d;">${val('em_status')}</b></td></tr>
+                        </table>
+
+                        <p style="font-size:8.5pt; line-height:1.5; margin-top:14px;">
+                            This eMedical record confirms that the applicant has completed the required immigration health examinations electronically via an approved Australian Panel Physician clinic. Results have been transmitted directly to the Department of Home Affairs.
+                        </p>
+
+                        <div style="margin-top:35px; display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-family:monospace; font-size:14pt; letter-spacing:3px; border:1px solid #000; padding:6px 12px;">
+                                *HAP-${val('em_hap')}*
+                            </div>
+                            <div style="text-align:right;">
+                                <div class="sig-script">Panel Physician</div>
+                                <div style="font-size:8pt;"><b>Authorized Medical Officer</b><br>eMedical Electronic Sign-off</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>HAP ID: ${val('em_hap')}</span><span>eMedical System Generated</span><span>Page 1 of 1</span></div>
+                </div>
+                `;
+            }
+
+            // ------------------ 6. POLICE CLEARANCE (BANGLADESH) ------------------
+            else if (currentDocType === 'policeClearance') {
+                canvas.innerHTML = `
+                <div class="a4-sheet" style="border:4px double #006a4e; padding:14mm;">
+                    ${wmHtml}
+                    <div class="sheet-content">
+                        <div style="text-align:center; border-bottom:2px solid #006a4e; padding-bottom:10px; margin-bottom:14px;">
+                            ${logoHtml}
+                            <div style="font-size:13pt; font-weight:bold; color:#006a4e; margin-top:4px;">GOVERNMENT OF THE PEOPLE'S REPUBLIC OF BANGLADESH</div>
+                            <div style="font-size:11pt; font-weight:bold;">BANGLADESH POLICE</div>
+                            <div style="font-size:9.5pt;">${val('pc_ps')}</div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; font-size:9.5pt; margin-bottom:16px;">
+                            <div><b>Ref No:</b> ${val('pc_ref')}</div>
+                            <div><b>Date:</b> ${val('pc_date')}</div>
+                        </div>
+
+                        <div style="text-align:center; font-size:14pt; font-weight:bold; text-decoration:underline; margin:16px 0; letter-spacing:1px;">
+                            POLICE CLEARANCE CERTIFICATE
+                        </div>
+
+                        <p style="font-size:10.5pt; line-height:1.85; text-align:justify; margin-top:16px;">
+                            This is to certify that <b>${val('pc_name')}</b>, Son/Daughter of <b>${val('pc_father')}</b>, residing at <b>${val('pc_addr')}</b>, holder of Bangladeshi International Passport No. <b>${val('pc_pp')}</b> issued on <b>${val('pc_pp_date')}</b>, has been thoroughly verified against the police records of this jurisdiction.
+                        </p>
+
+                        <p style="font-size:10.5pt; line-height:1.85; text-align:justify; margin-top:14px;">
+                            There is <b>nothing adverse</b> recorded against him/her in the police records of this Police Station or District. He/She bears a good moral character and there is no objection to his/her travelling abroad for employment or migration purposes.
+                        </p>
+
+                        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:65px;">
+                            <div style="text-align:center; width:32%;">
+                                <div class="sig-script" style="border-bottom:1px solid #000;">Verified</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>${val('pc_oc')}</b><br>Bangladesh Police</div>
+                            </div>
+
+                            <div style="text-align:center;">
+                                ${sealHtml}
+                                <div style="font-size:7pt; margin-top:2px;">Scan to Verify</div>
+                            </div>
+
+                            <div style="text-align:center; width:34%;">
+                                <div class="sig-script" style="border-bottom:1px solid #000;">Countersigned</div>
+                                <div style="font-size:8.5pt; margin-top:4px;"><b>${val('pc_sp')}</b><br>Bangladesh Police</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="a4-footer"><span>PCC REF: ${val('pc_ref')}</span><span>BANGLADESH POLICE ONLINE PORTAL</span><span>Page 1 of 1</span></div>
+                </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
