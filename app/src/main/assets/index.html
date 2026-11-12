@@ -8,7 +8,29 @@
 <div id="splash" class="splash-screen" role="status" aria-label="Loading Document Studio"><div class="splash-orb"><span class="splash-mark">D</span></div><p class="splash-eyebrow" id="splashEyebrow">WELCOME TO</p><h1 id="splashTitle">Document Studio</h1><p class="splash-subtitle" id="splashSubtitle">Prepare. Organize. Print.</p><div class="splash-loader"><span></span></div><small id="splashFooter">A clearer way to manage your documents</small></div>
 <main id="landing">
 <header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1 id="brandTitle">Document Studio</h1><p id="brandDescription">Prepare, organize and print your documents in one calm, simple workspace.</p></header>
-<section class="grid" id="documentGrid" aria-label="Document workspaces"></section><footer>Private workspace · Verify all information with the relevant issuing authority.</footer>
+<section class="grid" id="documentGrid" aria-label="Document workspaces"></section>
+<section class="template-hub" id="templateHub">
+  <div class="template-hub-head"><div><span class="eyebrow">CUSTOM LAYOUTS</span><h2>PDF / Image Templates</h2><p>Import a document page, place reusable fields, then fill it again whenever needed.</p></div><button class="template-primary" type="button" onclick="TemplateStudio.chooseFile()">＋ Create template</button></div>
+  <div id="savedTemplates" class="saved-templates"><p class="template-empty">No custom templates yet. Import a PDF or image to get started.</p></div>
+</section>
+<section id="templateEditor" class="template-editor" hidden>
+  <div class="template-toolbar">
+    <button type="button" class="back" onclick="TemplateStudio.close()">← Back</button>
+    <strong id="templateModeTitle">Template editor</strong>
+    <button type="button" class="template-secondary" onclick="TemplateStudio.addField()">＋ Add field</button>
+    <button type="button" class="template-primary" onclick="TemplateStudio.save()">Save template</button>
+  </div>
+  <div class="template-settings">
+    <label>Template name <input id="templateName" maxlength="70" placeholder="e.g. Personal application form"></label>
+    <label>Selected field label <input id="fieldLabel" maxlength="50" placeholder="Select a field"></label>
+    <label>Field type <select id="fieldType"><option value="text">Text</option><option value="date">Date</option><option value="number">Number</option></select></label>
+    <button type="button" class="template-secondary" onclick="TemplateStudio.removeField()">Delete field</button>
+    <button type="button" class="template-secondary" onclick="TemplateStudio.nextPage()">Load next PDF page</button>
+  </div>
+  <p id="templateHelp" class="template-help">Tap Add field, then drag fields over the areas that should be filled later. Resize from the lower-right handle.</p>
+  <div id="templatePages" class="template-pages"></div>
+  <div class="template-bottom"><span id="templatePageStatus">Page 1</span><span>Outputs are marked SAMPLE · NOT OFFICIAL.</span></div>
+</section><footer>Private workspace · Verify all information with the relevant issuing authority.</footer>
 </main>
 <main id="studio">
 <div class="layout">
@@ -131,4 +153,5 @@ document.getElementById('preview').innerHTML='<article class="a4 a4-'+current+'"
 function printDocument(){if(window.NativePrint&&window.NativePrint.printDocument)window.NativePrint.printDocument();else window.print();}
 function goBack(){document.getElementById('studio').style.display='none';document.getElementById('landing').style.display='block';current='';}
 </script>
+<script src="js/template-import.js"></script>
 </body></html>
