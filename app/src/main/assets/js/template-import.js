@@ -80,7 +80,8 @@ async function importFile(file) {
  if (file.size > 25*1024*1024) { alert('Choose a file smaller than 25 MB.'); return; }
  const ext=extOf(file);
  if (ext==='pdf' && file.type && file.type!=='application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) { alert('Choose a PDF or image file.'); return; }
- if (ext!=='pdf' && !['image/jpeg','image/png','image/webp'].includes(file.type) && !/\\.(jpe?g|png|webp)$/i.test(file.name)) { alert('Use a PDF, JPG, PNG or WebP image.'); return; }
+ const imageName = /\.(jpe?g|png|webp)$/i.test(file.name);
+ if (ext!=='pdf' && !['image/jpeg','image/jpg','image/png','image/webp'].includes(file.type) && !imageName) { alert('Use a PDF, JPG, PNG or WebP image.'); return; }
  if (!native()) { alert('PDF/Image import requires the Android app.'); return; }
  try {
    const data=await dataUrl(file); const assetId=native().saveAsset(data,ext);
