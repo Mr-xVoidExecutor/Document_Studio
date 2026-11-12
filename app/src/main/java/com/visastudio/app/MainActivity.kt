@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         webView.webViewClient = WebViewClient()
 
-        // আপনার মূল ডকুমেন্ট স্টুডিও অ্যাপটি সরাসরি লোড হবে
+        // এসেট ফোল্ডারে থাকা আলাদা HTML ফাইলটি লোড হবে
         webView.loadUrl("file:///android_asset/index.html")
     }
 
