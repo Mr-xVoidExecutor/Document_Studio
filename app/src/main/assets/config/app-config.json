@@ -1,0 +1,70 @@
+{
+  "app": {
+    "name": "Document Studio",
+    "tagline": "Your personal document workspace",
+    "description": "Prepare, organize and print your documents in one calm, simple workspace."
+  },
+  "splash": {
+    "eyebrow": "WELCOME TO",
+    "title": "Document Studio",
+    "subtitle": "Prepare. Organize. Print.",
+    "footer": "A clearer way to manage your documents",
+    "durationMs": 2100,
+    "animation": "fade-scale"
+  },
+  "appearance": {
+    "theme": "light",
+    "accent": "#10a37f",
+    "cardStyle": "floating-white"
+  },
+  "documents": [
+    {
+      "id": "subclass482",
+      "number": "01",
+      "icon": "▤",
+      "title": "Subclass 482 Preparation",
+      "description": "Organize personal, passport and employment details for your application.",
+      "action": "Open workspace"
+    },
+    {
+      "id": "offerLetter",
+      "number": "02",
+      "icon": "✉",
+      "title": "Employment Offer Draft",
+      "description": "Prepare an employer-editable offer letter using verified information.",
+      "action": "Open workspace"
+    },
+    {
+      "id": "workPermit",
+      "number": "03",
+      "icon": "▣",
+      "title": "Work Details Record",
+      "description": "Keep employment and sponsorship details together in one place.",
+      "action": "Open workspace"
+    },
+    {
+      "id": "visaGrant",
+      "number": "04",
+      "icon": "◎",
+      "title": "Visa Grant Information",
+      "description": "Organize details copied from your actual government notice.",
+      "action": "Open workspace"
+    },
+    {
+      "id": "eMedical",
+      "number": "05",
+      "icon": "＋",
+      "title": "Medical Appointment Tracker",
+      "description": "Track your HAP ID, appointment date and panel clinic details.",
+      "action": "Open workspace"
+    },
+    {
+      "id": "policeClearance",
+      "number": "06",
+      "icon": "✓",
+      "title": "Police Clearance Tracker",
+      "description": "Track your application reference and supporting information.",
+      "action": "Open workspace"
+    }
+  ]
+}
