@@ -1,11 +1,11 @@
 package com.visastudio.app
 
 import android.annotation.SuppressLint
-import android.app.PrintAttributes
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.print.PrintAttributes
 import android.print.PrintManager
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
