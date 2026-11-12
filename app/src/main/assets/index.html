@@ -1,20 +1,14 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10172a">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff">
 <title>Document Studio</title><link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+<div id="splash" class="splash-screen" role="status" aria-label="Loading Document Studio"><div class="splash-orb"><span class="splash-mark">D</span></div><p class="splash-eyebrow" id="splashEyebrow">WELCOME TO</p><h1 id="splashTitle">Document Studio</h1><p class="splash-subtitle" id="splashSubtitle">Prepare. Organize. Print.</p><div class="splash-loader"><span></span></div><small id="splashFooter">A clearer way to manage your documents</small></div>
 <main id="landing">
-<header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1>Document Studio</h1><p>Prepare, review and print your personal document drafts in a clean A4 workspace.</p><p class="bn">ডকুমেন্ট নির্বাচন করুন, নিজের সঠিক তথ্য যোগ করুন এবং A4 প্রিভিউ তৈরি করুন।</p></header>
-<section class="grid">
-<article class="card"><span class="number">01</span><h2>Subclass 482 Preparation</h2><p>Personal information worksheet for preparing an application.</p><button onclick="openDoc('subclass482')">Open workspace <b>→</b></button></article>
-<article class="card"><span class="number">02</span><h2>Employment Offer Draft</h2><p>Employer-editable offer letter using verified company details.</p><button onclick="openDoc('offerLetter')">Open workspace <b>→</b></button></article>
-<article class="card"><span class="number">03</span><h2>Work Details Record</h2><p>Organize employment and sponsorship details from your records.</p><button onclick="openDoc('workPermit')">Open workspace <b>→</b></button></article>
-<article class="card"><span class="number">04</span><h2>Visa Grant Information</h2><p>Record details from an actual government notice.</p><button onclick="openDoc('visaGrant')">Open workspace <b>→</b></button></article>
-<article class="card"><span class="number">05</span><h2>Medical Appointment Tracker</h2><p>Organize HAP ID, appointment and panel clinic information.</p><button onclick="openDoc('eMedical')">Open workspace <b>→</b></button></article>
-<article class="card"><span class="number">06</span><h2>Police Clearance Tracker</h2><p>Track application details and supporting information.</p><button onclick="openDoc('policeClearance')">Open workspace <b>→</b></button></article>
-</section><footer>Private workspace · Verify all information with the relevant issuing authority.</footer>
+<header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1 id="brandTitle">Document Studio</h1><p id="brandDescription">Prepare, organize and print your documents in one calm, simple workspace.</p></header>
+<section class="grid" id="documentGrid" aria-label="Document workspaces"></section><footer>Private workspace · Verify all information with the relevant issuing authority.</footer>
 </main>
 <main id="studio">
 <div class="layout">
@@ -29,6 +23,27 @@
 </main>
 <script>
 'use strict';
+function loadAppConfig(){
+ const fallback={app:{name:'Document Studio',description:'Your personal document workspace.'},splash:{eyebrow:'WELCOME TO',title:'Document Studio',subtitle:'Prepare. Organize. Print.',footer:'A clearer way to manage your documents',durationMs:2100},documents:[]};
+ try{const request=new XMLHttpRequest();request.open('GET','config/app-config.json',false);request.send(null);if(request.status===0||request.status===200)return JSON.parse(request.responseText);}catch(error){console.warn('Using fallback configuration.',error);}
+ return fallback;
+}
+const appConfig=loadAppConfig();
+function applyAppConfig(){
+ const app=appConfig.app||{},splash=appConfig.splash||{};
+ document.title=app.name||'Document Studio';
+ document.getElementById('brandTitle').textContent=app.name||'Document Studio';
+ document.getElementById('brandDescription').textContent=app.description||'Your personal document workspace.';
+ document.getElementById('splashEyebrow').textContent=splash.eyebrow||'WELCOME TO';
+ document.getElementById('splashTitle').textContent=splash.title||app.name||'Document Studio';
+ document.getElementById('splashSubtitle').textContent=splash.subtitle||app.tagline||'Prepare. Organize. Print.';
+ document.getElementById('splashFooter').textContent=splash.footer||'A clearer way to manage your documents';
+ document.getElementById('documentGrid').innerHTML=(appConfig.documents||[]).map(doc=>'<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">'+esc(doc.icon||'▤')+'</span><span class="number">'+esc(doc.number||'')+'</span></div><div class="card-copy"><h2>'+esc(doc.title)+'</h2><p>'+esc(doc.description)+'</p></div><button type="button" onclick="openDoc(\''+esc(doc.id)+'\')">'+esc(doc.action||'Open workspace')+'<b aria-hidden="true">→</b></button></article>').join('');
+ const splashNode=document.getElementById('splash');
+ window.setTimeout(()=>{splashNode.classList.add('splash-hidden');window.setTimeout(()=>splashNode.remove(),650);},Math.max(900,Number(splash.durationMs)||2100));
+}
+
+applyAppConfig();
 const definitions={
 subclass482:{title:'Subclass 482 Preparation',sections:[['Applicant details',[['family','Family name'],['given','Given names'],['dob','Date of birth'],['sex','Sex (as recorded)','select',['','Male','Female','Another / as recorded']],['birthTown','Town of birth'],['birthCountry','Country of birth']]],['Passport details',[['passport','Passport number'],['nationality','Nationality'],['issue','Passport issue date'],['expiry','Passport expiry date'],['authority','Issuing authority']]],['Employment and contact',[['occupation','Usual occupation'],['role','Proposed occupation'],['address','Residential address','textarea'],['mobile','Mobile','tel'],['email','Email','email']]]]},
 offerLetter:{title:'Employment Offer Draft',sections:[['Employer details (verified information only)',[['employer','Legal employer name'],['employerAddress','Registered business address','textarea'],['employerEmail','Employer contact email','email'],['employerPhone','Employer phone','tel']]],['Offer details',[['ref','Reference number'],['date','Issue date'],['candidate','Candidate full name'],['candidateAddress','Candidate address','textarea'],['role','Position / role'],['location','Work location'],['salary','Salary and currency'],['hours','Hours per week','number'],['employmentType','Employment type'],['start','Proposed start date']]],['Authorized representative',[['representative','Representative name'],['jobTitle','Job title']]]]},
