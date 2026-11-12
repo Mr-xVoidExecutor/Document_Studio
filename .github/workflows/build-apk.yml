@@ -28,7 +28,11 @@ jobs:
           set -euo pipefail
           test -s app/src/main/assets/index.html
           test -s app/src/main/assets/css/style.css
+          test -s app/src/main/assets/js/template-import.js
+          node --check app/src/main/assets/js/template-import.js
+          python -m json.tool app/src/main/assets/config/app-config.json > /dev/null
           grep -q 'SAMPLE' app/src/main/assets/index.html
+          grep -q 'NativeTemplate' app/src/main/java/com/visastudio/app/MainActivity.kt
           grep -q 'printDocument' app/src/main/java/com/visastudio/app/MainActivity.kt
       - name: Build debug APK
         run: |
