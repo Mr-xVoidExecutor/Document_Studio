@@ -84,6 +84,14 @@ class MainActivity : AppCompatActivity() {
                 if (encoded.isBlank() || encoded.length > 36_000_000) return ""
                 val bytes = Base64.decode(encoded, Base64.DEFAULT)
                 if (bytes.size > 25 * 1024 * 1024) return ""
+                val valid = when (ext) {
+                    "pdf" -> bytes.size >= 5 && String(bytes, 0, 5, Charsets.US_ASCII) == "%PDF-"
+                    "jpg", "jpeg" -> bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte()
+                    "png" -> bytes.size >= 8 && bytes.take(8).toByteArray().contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
+                    "webp" -> bytes.size >= 12 && String(bytes, 0, 4, Charsets.US_ASCII) == "RIFF" && String(bytes, 8, 4, Charsets.US_ASCII) == "WEBP"
+                    else -> false
+                }
+                if (!valid) return ""
                 val id = UUID.randomUUID().toString()
                 FileOutputStream(File(assetDir, "$id.$ext")).use { it.write(bytes) }
                 id
@@ -107,6 +115,16 @@ class MainActivity : AppCompatActivity() {
         }
 
         @JavascriptInterface
+        fun deleteAsset(assetId: String): Boolean {
+            return try {
+                if (!assetId.matches(Regex("[0-9a-fA-F-]{36}"))) return false
+                val files = assetDir.listFiles()?.filter { it.name.startsWith("$assetId.") } ?: return false
+                files.forEach { it.delete() }
+                true
+            } catch (_: Exception) { false }
+        }
+
+        @JavascriptInterface
         fun pdfPageCount(assetId: String): Int {
             return try {
                 val file = pdfFile(assetId) ?: return 0
@@ -121,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                 PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)).use { renderer ->
                     if (pageIndex !in 0 until renderer.pageCount) return ""
                     renderer.openPage(pageIndex).use { page ->
-                        val scale = minOf(2.5f, 2400f / page.width.toFloat())
+                        val scale = minOf(2.5f, 2400f / page.width.toFloat(), 3200f / page.height.toFloat())
                         val width = (page.width * scale).toInt().coerceAtLeast(1)
                         val height = (page.height * scale).toInt().coerceAtLeast(1)
                         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -139,6 +157,11 @@ class MainActivity : AppCompatActivity() {
             if (!assetId.matches(Regex("[0-9a-fA-F-]{36}"))) return null
             return assetDir.listFiles()?.firstOrNull { it.name == "$assetId.pdf" }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (::webView.isInitialized) webView.evaluateJavascript("document.body.classList.remove('template-print-mode')", null)
     }
 
     private fun openPrintDialog() {
