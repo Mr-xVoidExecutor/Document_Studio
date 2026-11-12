@@ -53,3 +53,5 @@
  body.template-print-mode .template-page{width:190mm;height:auto;box-shadow:none;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  @page{size:A4 portrait;margin:8mm}
 }
+
+.template-source-image{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;z-index:0;pointer-events:none}.template-field{z-index:1}
