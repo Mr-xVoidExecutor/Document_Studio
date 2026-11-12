@@ -17,15 +17,15 @@
   <div class="template-toolbar">
     <button type="button" class="back" onclick="TemplateStudio.close()">← Back</button>
     <strong id="templateModeTitle">Template editor</strong>
-    <button type="button" class="template-secondary" onclick="TemplateStudio.addField()">＋ Add field</button>
-    <button type="button" class="template-primary" onclick="TemplateStudio.save()">Save template</button>
+    <button id="templateToolbarAdd" type="button" class="template-secondary" onclick="TemplateStudio.addField()">＋ Add field</button>
+    <button id="templateToolbarSave" type="button" class="template-primary" onclick="TemplateStudio.save()">Save template</button>
   </div>
-  <div class="template-settings">
+  <div id="templateSettings" class="template-settings">
     <label>Template name <input id="templateName" maxlength="70" placeholder="e.g. Personal application form"></label>
     <label>Selected field label <input id="fieldLabel" maxlength="50" placeholder="Select a field"></label>
     <label>Field type <select id="fieldType"><option value="text">Text</option><option value="date">Date</option><option value="number">Number</option></select></label>
-    <button type="button" class="template-secondary" onclick="TemplateStudio.removeField()">Delete field</button>
-    <button type="button" class="template-secondary" onclick="TemplateStudio.nextPage()">Load next PDF page</button>
+    <button id="templateDeleteField" type="button" class="template-secondary" onclick="TemplateStudio.removeField()">Delete field</button>
+    <button id="templateNextPage" type="button" class="template-secondary" onclick="TemplateStudio.nextPage()">Load next PDF page</button>
   </div>
   <p id="templateHelp" class="template-help">Tap Add field, then drag fields over the areas that should be filled later. Resize from the lower-right handle.</p>
   <div id="templatePages" class="template-pages"></div>
