@@ -30,7 +30,14 @@ function loadAppConfig(){
 }
 const appConfig=loadAppConfig();
 function applyAppConfig(){
- const app=appConfig.app||{},splash=appConfig.splash||{};
+ const app=appConfig.app||{},splash=appConfig.splash||{},appearance=appConfig.appearance||{},page=appearance.page||{},type=appearance.typography||{};
+ const root=document.documentElement;
+ if(appearance.accent)root.style.setProperty('--accent',appearance.accent);
+ if(page.padding)root.style.setProperty('--sheet-padding',page.padding);
+ if(type.family)root.style.setProperty('--sheet-font',type.family);
+ if(type.titleSize)root.style.setProperty('--sheet-title-size',type.titleSize);
+ if(type.bodySize)root.style.setProperty('--sheet-body-size',type.bodySize);
+ if(type.labelSize)root.style.setProperty('--sheet-label-size',type.labelSize);
  document.title=app.name||'Document Studio';
  document.getElementById('brandTitle').textContent=app.name||'Document Studio';
  document.getElementById('brandDescription').textContent=app.description||'Your personal document workspace.';
@@ -86,7 +93,10 @@ section[1].forEach((f,i)=>{html+=fieldMarkup(f);});
 html+='</div>';
 });
 html+='<p class="form-hint">'+esc(cautions[type])+'</p>';
-document.getElementById('formArea').innerHTML=html;
+const formArea=document.getElementById('formArea');
+formArea.innerHTML=html;
+formArea.oninput=renderPreview;
+formArea.onchange=renderPreview;
 renderPreview();
 }
 function readPhoto(input){
@@ -116,7 +126,7 @@ body='<div class="eyebrow">PERSONAL APPOINTMENT TRACKER</div><h1>'+headings[curr
 }else{
 body='<div class="eyebrow">PERSONAL APPLICATION TRACKER</div><h1>'+headings[current]+'</h1><p class="subtitle">A private record to help track an application and supporting details.</p><h3>Application details</h3>'+grid([['Reference number','reference'],['Submission date','date'],['Police station / issuing office','office']])+'<h3>Applicant details</h3>'+grid([['Applicant name','name'],['Father / parent name','parent'],['Passport number','passport'],['Passport issue date','passportDate'],['Permanent address','address'],['Application status / notes','status']]);
 }
-document.getElementById('preview').innerHTML='<article class="a4">'+banner()+'<div class="sheet-content">'+body+'<div class="warning">'+esc(cautions[current])+'</div></div><footer><span>PERSONAL DRAFT</span><span>Not issued by an authority</span><span>Page 1</span></footer></article>';
+document.getElementById('preview').innerHTML='<article class="a4 a4-'+current+'">'+banner()+'<div class="sheet-content">'+body+'<div class="warning">'+esc(cautions[current])+'</div></div><footer><span>PERSONAL DRAFT</span><span>Not issued by an authority</span><span>Page 1</span></footer></article>';
 }
 function printDocument(){if(window.NativePrint&&window.NativePrint.printDocument)window.NativePrint.printDocument();else window.print();}
 function goBack(){document.getElementById('studio').style.display='none';document.getElementById('landing').style.display='block';current='';}
