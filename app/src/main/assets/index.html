@@ -1,140 +1,109 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Official Visa & Migration Document Studio</title>
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#10172a">
+<title>Document Studio</title><link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
-    <!-- PAGE 1: LANDING DASHBOARD -->
-    <div id="page-landing">
-        <div class="hero-header">
-            <h1>Document & Visa Application Studio</h1>
-            <p>যেকোনো একটি ডকুমেন্ট সিলেক্ট করুন, তথ্য দিন এবং সরাসরি অফিশিয়াল A4 PDF জেনারেট করুন</p>
-        </div>
-
-        <div class="doc-grid">
-            <div class="doc-card">
-                <div><h3>1. SubClass 482 Application</h3><p>অস্ট্রেলিয়া ওয়ার্ক পারমিট ভিসা আবেদন ফর্ম।</p></div>
-                <button class="btn-open" onclick="openDocument('subclass482')">Open Form →</button>
-            </div>
-            <div class="doc-card">
-                <div><h3>2. Job Offer Letter</h3><p>RTS Group & Costa Group অফার লেটার।</p></div>
-                <button class="btn-open" onclick="openDocument('offerLetter')">Open Form →</button>
-            </div>
-            <div class="doc-card">
-                <div><h3>3. Australian Work Permit</h3><p>অফিশিয়াল ওয়ার্ক পারমিট সার্টিফিকেট।</p></div>
-                <button class="btn-open" onclick="openDocument('workPermit')">Open Form →</button>
-            </div>
-            <div class="doc-card">
-                <div><h3>4. Visa Grant Notice</h3><p>ডিপার্টমেন্ট অব হোম অ্যাফেয়ার্স ভিসা গ্রান্ট।</p></div>
-                <button class="btn-open" onclick="openDocument('visaGrant')">Open Form →</button>
-            </div>
-            <div class="doc-card">
-                <div><h3>5. E-Medical Certificate</h3><p>ই-মেডিকেল রেফারেল ও হেলথ ক্লিয়ারেন্স।</p></div>
-                <button class="btn-open" onclick="openDocument('eMedical')">Open Form →</button>
-            </div>
-            <div class="doc-card">
-                <div><h3>6. Police Clearance</h3><p>বাংলাদেশ পুলিশ ক্লিয়ারেন্স সার্টিফিকেট।</p></div>
-                <button class="btn-open" onclick="openDocument('policeClearance')">Open Form →</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- PAGE 2: STUDIO -->
-    <div id="page-studio">
-        <div class="studio-layout">
-            <div class="left-form">
-                <div class="studio-topbar">
-                    <span id="studio-title" style="font-weight:600; font-size:14px;">Document Editor</span>
-                    <button class="btn-open" style="width:auto; padding:5px 10px; font-size:11px;" onclick="goBack()">← Back</button>
-                </div>
-                <div class="form-fields-area" id="dynamic-form-container"></div>
-                <div class="studio-footer">
-                    <button class="btn-gen" onclick="renderCurrentDocument()">⚡ Preview</button>
-                    <button class="btn-pdf" onclick="window.print()">🖨️ Print PDF</button>
-                </div>
-            </div>
-            <div class="right-preview" id="preview-canvas"></div>
-        </div>
-    </div>
-
-    <!-- Load All Form Files -->
-    <script src="js/forms/subclass482.js"></script>
-    <script src="js/forms/offerLetter.js"></script>
-    <script src="js/forms/workPermit.js"></script>
-    <script src="js/forms/visaGrant.js"></script>
-    <script src="js/forms/eMedical.js"></script>
-    <script src="js/forms/policeClearance.js"></script>
-
-    <!-- Load All Template Files -->
-    <script src="js/templates/subclass482.js"></script>
-    <script src="js/templates/offerLetter.js"></script>
-    <script src="js/templates/workPermit.js"></script>
-    <script src="js/templates/visaGrant.js"></script>
-    <script src="js/templates/eMedical.js"></script>
-    <script src="js/templates/policeClearance.js"></script>
-
-    <script>
-        let currentDocType = '';
-        let uploadedImages = { photo: '', logo: '', watermark: '', seal: '' };
-
-        function handleImageUpload(input, key) {
-            const file = input.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedImages[key] = e.target.result;
-                    renderCurrentDocument();
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function openDocument(type) {
-            currentDocType = type;
-            uploadedImages = { photo: '', logo: '', watermark: '', seal: '' };
-            document.getElementById('page-landing').style.display = 'none';
-            document.getElementById('page-studio').style.display = 'block';
-            buildFormForDocument(type);
-            renderCurrentDocument();
-        }
-
-        function goBack() {
-            document.getElementById('page-studio').style.display = 'none';
-            document.getElementById('page-landing').style.display = 'block';
-        }
-
-        function val(id) {
-            const el = document.getElementById(id);
-            return el ? el.value : '';
-        }
-
-        function buildFormForDocument(type) {
-            if (type === 'subclass482') getSubclass482Form();
-            else if (type === 'offerLetter') getOfferLetterForm();
-            else if (type === 'workPermit') getWorkPermitForm();
-            else if (type === 'visaGrant') getVisaGrantForm();
-            else if (type === 'eMedical') getEMedicalForm();
-            else if (type === 'policeClearance') getPoliceClearanceForm();
-        }
-
-        function renderCurrentDocument() {
-            const canvas = document.getElementById('preview-canvas');
-            const wmHtml = uploadedImages.watermark ? `<img src="${uploadedImages.watermark}" class="watermark-layer">` : '';
-            const logoHtml = uploadedImages.logo ? `<img src="${uploadedImages.logo}" style="max-height:65px; max-width:160px; object-fit:contain;">` : '';
-            const photoHtml = uploadedImages.photo ? `<img src="${uploadedImages.photo}" style="width:100%; height:100%; object-fit:cover;">` : '<span style="font-size:8pt; color:#666;">PHOTO</span>';
-            const sealHtml = uploadedImages.seal ? `<img src="${uploadedImages.seal}" style="max-height:75px; max-width:75px; object-fit:contain;">` : '<div style="width:65px; height:65px; border:1px dashed #666; display:flex; align-items:center; justify-content:center; font-size:7pt;">QR / SEAL</div>';
-
-            if (currentDocType === 'subclass482') canvas.innerHTML = getSubclass482Template(val, photoHtml);
-            else if (currentDocType === 'offerLetter') canvas.innerHTML = getOfferLetterTemplate(val, logoHtml, wmHtml);
-            else if (currentDocType === 'workPermit') canvas.innerHTML = getWorkPermitTemplate(val, photoHtml, logoHtml, wmHtml, sealHtml);
-            else if (currentDocType === 'visaGrant') canvas.innerHTML = getVisaGrantTemplate(val, logoHtml, wmHtml);
-            else if (currentDocType === 'eMedical') canvas.innerHTML = getEMedicalTemplate(val, photoHtml, logoHtml);
-            else if (currentDocType === 'policeClearance') canvas.innerHTML = getPoliceClearanceTemplate(val, logoHtml, wmHtml, sealHtml);
-        }
-    </script>
-</body>
-</html>
+<main id="landing">
+<header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1>Document Studio</h1><p>Prepare, review and print your personal document drafts in a clean A4 workspace.</p><p class="bn">ডকুমেন্ট নির্বাচন করুন, নিজের সঠিক তথ্য যোগ করুন এবং A4 প্রিভিউ তৈরি করুন।</p></header>
+<section class="grid">
+<article class="card"><span class="number">01</span><h2>Subclass 482 Preparation</h2><p>Personal information worksheet for preparing an application.</p><button onclick="openDoc('subclass482')">Open workspace <b>→</b></button></article>
+<article class="card"><span class="number">02</span><h2>Employment Offer Draft</h2><p>Employer-editable offer letter using verified company details.</p><button onclick="openDoc('offerLetter')">Open workspace <b>→</b></button></article>
+<article class="card"><span class="number">03</span><h2>Work Details Record</h2><p>Organize employment and sponsorship details from your records.</p><button onclick="openDoc('workPermit')">Open workspace <b>→</b></button></article>
+<article class="card"><span class="number">04</span><h2>Visa Grant Information</h2><p>Record details from an actual government notice.</p><button onclick="openDoc('visaGrant')">Open workspace <b>→</b></button></article>
+<article class="card"><span class="number">05</span><h2>Medical Appointment Tracker</h2><p>Organize HAP ID, appointment and panel clinic information.</p><button onclick="openDoc('eMedical')">Open workspace <b>→</b></button></article>
+<article class="card"><span class="number">06</span><h2>Police Clearance Tracker</h2><p>Track application details and supporting information.</p><button onclick="openDoc('policeClearance')">Open workspace <b>→</b></button></article>
+</section><footer>Private workspace · Verify all information with the relevant issuing authority.</footer>
+</main>
+<main id="studio">
+<div class="layout">
+<aside class="editor">
+<div class="topbar"><div><span class="top-kicker">DOCUMENT STUDIO</span><strong id="docTitle">Editor</strong></div><button class="back" onclick="goBack()">← Back</button></div>
+<div class="notice"><b>Draft workspace</b><span>Output is a personal draft, not an official certificate, permit, visa notice or clearance.</span></div>
+<div id="formArea" class="form-area"></div>
+<div class="actions"><button class="preview-btn" onclick="renderPreview()">Preview</button><button class="print-btn" onclick="printDocument()">Print / Save PDF</button></div>
+</aside>
+<section id="preview" class="preview" aria-live="polite"></section>
+</div>
+</main>
+<script>
+'use strict';
+const definitions={
+subclass482:{title:'Subclass 482 Preparation',sections:[['Applicant details',[['family','Family name'],['given','Given names'],['dob','Date of birth'],['sex','Sex (as recorded)','select',['','Male','Female','Another / as recorded']],['birthTown','Town of birth'],['birthCountry','Country of birth']]],['Passport details',[['passport','Passport number'],['nationality','Nationality'],['issue','Passport issue date'],['expiry','Passport expiry date'],['authority','Issuing authority']]],['Employment and contact',[['occupation','Usual occupation'],['role','Proposed occupation'],['address','Residential address','textarea'],['mobile','Mobile','tel'],['email','Email','email']]]]},
+offerLetter:{title:'Employment Offer Draft',sections:[['Employer details (verified information only)',[['employer','Legal employer name'],['employerAddress','Registered business address','textarea'],['employerEmail','Employer contact email','email'],['employerPhone','Employer phone','tel']]],['Offer details',[['ref','Reference number'],['date','Issue date'],['candidate','Candidate full name'],['candidateAddress','Candidate address','textarea'],['role','Position / role'],['location','Work location'],['salary','Salary and currency'],['hours','Hours per week','number'],['employmentType','Employment type'],['start','Proposed start date']]],['Authorized representative',[['representative','Representative name'],['jobTitle','Job title']]]]},
+workPermit:{title:'Work Details Record',sections:[['Personal details',[['name','Full name'],['dob','Date of birth'],['nationality','Nationality'],['passport','Passport number']]],['Employment record',[['employer','Employer / sponsor as stated in source records'],['visaClass','Visa subclass (if applicable)'],['reference','Record reference (optional)'],['date','Relevant date (optional)']]]]},
+visaGrant:{title:'Visa Grant Information',sections:[['Applicant details',[['name','Applicant full name'],['dob','Date of birth'],['passport','Passport number'],['visaClass','Visa subclass']]],['Details copied from your actual notice',[['grant','Visa grant number'],['trn','Transaction reference (TRN)'],['date','Grant date shown on notice'],['expiry','Visa expiry / stay period'],['sponsor','Sponsoring employer (if applicable)']]]]},
+eMedical:{title:'Medical Appointment Tracker',sections:[['Appointment details',[['hap','HAP ID'],['date','Appointment date'],['name','Applicant full name'],['passport','Passport number'],['clinic','Panel clinic']]],['Referral and notes',[['tests','Required examinations (as shown in referral)','textarea'],['notes','Personal notes (no medical decision)','textarea']]]]},
+policeClearance:{title:'Police Clearance Tracker',sections:[['Application details',[['reference','Application / reference number'],['date','Submission date'],['office','Police station / issuing office']]],['Applicant details',[['name','Applicant full name'],['parent','Father / parent name'],['passport','Passport number'],['passportDate','Passport issue date'],['address','Permanent address','textarea'],['status','Application status / follow-up notes','textarea']]]]}
+};
+const cautions={
+subclass482:'Preparation copy only. This is not an Australian Government form, visa application or evidence of eligibility. Use the current form and instructions published by the Department of Home Affairs.',
+offerLetter:'Draft template only. Employer identity, address, employment terms, sponsorship claims and representative authority must be verified and approved by the employer. This document does not establish an offer or sponsorship by itself.',
+workPermit:'This is not a work permit, visa grant, approval or proof of work rights. It is not issued or verified by the Australian Government. Check visa status and conditions using official government services.',
+visaGrant:'This is not a visa grant notification and does not confirm that a visa has been granted. Verify all information against the original Department of Home Affairs notice or official account.',
+eMedical:'Appointment tracker only. It is not a medical certificate, examination result, health clearance or decision by a panel physician or government authority.',
+policeClearance:'This is not a Police Clearance Certificate, police verification or criminal-record result. Submit through the official Bangladesh Police service and obtain any certificate from the authorized issuing authority.'
+};
+const headings={
+subclass482:'Personal information summary',offerLetter:'Employment offer',workPermit:'Work and sponsorship details',visaGrant:'Visa grant information',eMedical:'Immigration medical appointment',policeClearance:'Police clearance application'
+};
+let current='';
+let photoData='';
+function esc(value){return String(value==null?'':value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fieldMarkup(field){
+const [id,label,type='text',options]=field;
+if(type==='select')return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><select id="'+id+'">'+options.map(v=>'<option value="'+esc(v)+'">'+(v?esc(v):'Select')+'</option>').join('')+'</select></div>';
+if(type==='textarea')return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><textarea id="'+id+'" rows="2"></textarea></div>';
+return '<div class="field"><label for="'+id+'">'+esc(label)+'</label><input id="'+id+'" type="'+type+'" '+(type==='number'?'min="1" max="80"':'')+'></div>';
+}
+function openDoc(type){
+if(!definitions[type])return;
+current=type;photoData='';
+document.getElementById('landing').style.display='none';
+document.getElementById('studio').style.display='block';
+document.getElementById('docTitle').textContent=definitions[type].title;
+let html='';
+if(type==='subclass482')html+='<div class="section">Optional reference photo</div><div class="field"><label for="photo">Applicant photo (optional)</label><input id="photo" type="file" accept="image/*" onchange="readPhoto(this)"></div>';
+definitions[type].sections.forEach(section=>{
+html+='<div class="section">'+esc(section[0])+'</div><div class="fields">';
+section[1].forEach((f,i)=>{html+=fieldMarkup(f);});
+html+='</div>';
+});
+html+='<p class="form-hint">'+esc(cautions[type])+'</p>';
+document.getElementById('formArea').innerHTML=html;
+renderPreview();
+}
+function readPhoto(input){
+const file=input.files&&input.files[0];if(!file)return;
+if(!file.type.startsWith('image/')){alert('Please choose an image file.');input.value='';return;}
+if(file.size>5*1024*1024){alert('Choose an image smaller than 5 MB.');input.value='';return;}
+const reader=new FileReader();reader.onload=e=>{photoData=e.target.result;renderPreview();};reader.onerror=()=>alert('Could not read this image.');reader.readAsDataURL(file);
+}
+function v(id){const el=document.getElementById(id);return el?esc(el.value.trim()):'';}
+function pair(label,id){return '<div class="sheet-field"><label>'+esc(label)+'</label><strong>'+v(id)+'</strong></div>';}
+function grid(items){return '<div class="sheet-grid">'+items.map(x=>pair(x[0],x[1])).join('')+'</div>';}
+function table(rows){return '<table class="sheet-table">'+rows.map(r=>'<tr><th>'+esc(r[0])+'</th><td>'+v(r[1])+'</td></tr>').join('')+'</table>';}
+function banner(){return '<div class="sample-watermark">SAMPLE · NOT OFFICIAL</div>';}
+function renderPreview(){
+if(!current)return;
+let body='';
+if(current==='subclass482'){
+body='<div class="eyebrow">PERSONAL PREPARATION WORKSHEET</div><h1>'+headings[current]+'</h1><p class="subtitle">Personal information summary · Review against the current official application form before submission.</p><div class="photo-row"><div class="photo-fields">'+grid([['Family name','family'],['Given names','given'],['Date of birth','dob'],['Sex','sex'],['Town of birth','birthTown'],['Country of birth','birthCountry']])+'</div>'+(photoData?'<img class="photo" src="'+photoData+'" alt="Applicant reference photo">':'<div class="photo-empty">OPTIONAL PHOTO</div>')+'</div><h3>Passport details</h3>'+grid([['Passport number','passport'],['Nationality','nationality'],['Issue date','issue'],['Expiry date','expiry'],['Issuing authority','authority']])+'<h3>Employment and contact</h3>'+grid([['Usual occupation','occupation'],['Proposed occupation','role'],['Mobile','mobile'],['Email','email'],['Residential address','address']]);
+}else if(current==='offerLetter'){
+body='<div class="eyebrow">EMPLOYER-EDITABLE DRAFT</div><h1>'+headings[current]+'</h1><p class="subtitle">Complete only with accurate details approved by the employer.</p><div class="employer-head"><h2>'+v('employer')+'</h2><p>'+v('employerAddress')+'</p><p>'+v('employerEmail')+' · '+v('employerPhone')+'</p></div><p>Date: <b>'+v('date')+'</b><br>Reference: <b>'+v('ref')+'</b></p><p>To: <b>'+v('candidate')+'</b><br>'+v('candidateAddress')+'</p><h3>Subject: Offer of employment</h3><p>Dear '+v('candidate')+',</p><p>On behalf of '+v('employer')+', we are pleased to present this draft offer for the role described below. The offer is subject to the employer’s final written approval and the terms in the executed employment agreement.</p>'+table([['Position / role','role'],['Work location','location'],['Salary and currency','salary'],['Hours per week','hours'],['Employment type','employmentType'],['Proposed start date','start']])+'<p>Please review the terms and contact the employer directly with any questions. Do not treat this draft as an issued offer until approved and signed by an authorized representative.</p><p class="signature"><b>'+v('representative')+'</b><br>'+v('jobTitle')+'<br>'+v('employer')+'</p>';
+}else if(current==='workPermit'){
+body='<div class="eyebrow">PERSONAL RECORD SUMMARY</div><h1>'+headings[current]+'</h1><p class="subtitle">A private worksheet for organizing information from your own records.</p><h3>Personal details</h3>'+grid([['Full name','name'],['Date of birth','dob'],['Nationality','nationality'],['Passport number','passport']])+'<h3>Employment record</h3>'+grid([['Employer / sponsor','employer'],['Visa subclass','visaClass'],['Record reference','reference'],['Relevant date','date']]);
+}else if(current==='visaGrant'){
+body='<div class="eyebrow">PERSONAL INFORMATION ORGANIZER</div><h1>'+headings[current]+'</h1><p class="subtitle">Transcribe details from your actual visa grant notice or official account.</p><h3>Applicant details</h3>'+grid([['Applicant name','name'],['Date of birth','dob'],['Passport number','passport'],['Visa subclass','visaClass']])+'<h3>Notice reference details</h3>'+grid([['Visa grant number','grant'],['Transaction reference','trn'],['Grant date','date'],['Stay / expiry information','expiry'],['Sponsoring employer','sponsor']]);
+}else if(current==='eMedical'){
+body='<div class="eyebrow">PERSONAL APPOINTMENT TRACKER</div><h1>'+headings[current]+'</h1><p class="subtitle">Keep appointment and referral information together for your own reference.</p><h3>Applicant and appointment</h3>'+grid([['Applicant name','name'],['Passport number','passport'],['HAP ID','hap'],['Appointment date','date'],['Panel clinic','clinic']])+'<h3>Referral and notes</h3>'+table([['Required examinations','tests'],['Personal notes','notes']]);
+}else{
+body='<div class="eyebrow">PERSONAL APPLICATION TRACKER</div><h1>'+headings[current]+'</h1><p class="subtitle">A private record to help track an application and supporting details.</p><h3>Application details</h3>'+grid([['Reference number','reference'],['Submission date','date'],['Police station / issuing office','office']])+'<h3>Applicant details</h3>'+grid([['Applicant name','name'],['Father / parent name','parent'],['Passport number','passport'],['Passport issue date','passportDate'],['Permanent address','address'],['Application status / notes','status']]);
+}
+document.getElementById('preview').innerHTML='<article class="a4">'+banner()+'<div class="sheet-content">'+body+'<div class="warning">'+esc(cautions[current])+'</div></div><footer><span>PERSONAL DRAFT</span><span>Not issued by an authority</span><span>Page 1</span></footer></article>';
+}
+function printDocument(){if(window.NativePrint&&window.NativePrint.printDocument)window.NativePrint.printDocument();else window.print();}
+function goBack(){document.getElementById('studio').style.display='none';document.getElementById('landing').style.display='block';current='';}
+</script>
+</body></html>
