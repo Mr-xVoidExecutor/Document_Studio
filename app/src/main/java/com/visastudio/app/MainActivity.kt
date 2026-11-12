@@ -3,10 +3,14 @@ package com.visastudio.app
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
 import android.print.PrintAttributes
 import android.print.PrintManager
+import android.util.Base64
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -14,11 +18,16 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.util.UUID
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val fileChooserRequestCode = 4102
+    private val assetDir by lazy { File(filesDir, "template-assets").apply { mkdirs() } }
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,12 +50,14 @@ class MainActivity : AppCompatActivity() {
             ): Boolean {
                 this@MainActivity.filePathCallback?.onReceiveValue(null)
                 this@MainActivity.filePathCallback = filePath
-                val picker = Intent(Intent.ACTION_GET_CONTENT).apply {
+                val picker = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "image/*"
+                    type = "*/*"
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("application/pdf", "image/jpeg", "image/png", "image/webp"))
+                    putExtra(Intent.EXTRA_ALLOW_MULTIPLE, false)
                 }
                 return try {
-                    startActivityForResult(Intent.createChooser(picker, "Select an image"), fileChooserRequestCode)
+                    startActivityForResult(Intent.createChooser(picker, "Choose a PDF or image"), fileChooserRequestCode)
                     true
                 } catch (_: Exception) {
                     this@MainActivity.filePathCallback?.onReceiveValue(null)
@@ -55,13 +66,79 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+        webView.addJavascriptInterface(TemplateBridge(), "NativeTemplate")
         webView.addJavascriptInterface(object {
             @JavascriptInterface
-            fun printDocument() {
-                runOnUiThread { openPrintDialog() }
-            }
+            fun printDocument() { runOnUiThread { openPrintDialog() } }
         }, "NativePrint")
         webView.loadUrl("file:///android_asset/index.html")
+    }
+
+    private inner class TemplateBridge {
+        @JavascriptInterface
+        fun saveAsset(dataUrl: String, extension: String): String {
+            return try {
+                val ext = extension.lowercase().filter { it in "abcdefghijklmnopqrstuvwxyz0123456789" }
+                if (ext !in setOf("pdf", "jpg", "jpeg", "png", "webp")) return ""
+                val encoded = dataUrl.substringAfter(",", "")
+                if (encoded.isBlank() || encoded.length > 36_000_000) return ""
+                val bytes = Base64.decode(encoded, Base64.DEFAULT)
+                if (bytes.size > 25 * 1024 * 1024) return ""
+                val id = UUID.randomUUID().toString()
+                FileOutputStream(File(assetDir, "$id.$ext")).use { it.write(bytes) }
+                id
+            } catch (_: Exception) { "" }
+        }
+
+        @JavascriptInterface
+        fun loadAsset(assetId: String): String {
+            return try {
+                if (!assetId.matches(Regex("[0-9a-fA-F-]{36}"))) return ""
+                val file = assetDir.listFiles()?.firstOrNull { it.name.startsWith("$assetId.") } ?: return ""
+                if (file.length() > 25L * 1024 * 1024) return ""
+                val mime = when (file.extension.lowercase()) {
+                    "pdf" -> "application/pdf"
+                    "png" -> "image/png"
+                    "webp" -> "image/webp"
+                    else -> "image/jpeg"
+                }
+                "data:$mime;base64," + Base64.encodeToString(file.readBytes(), Base64.NO_WRAP)
+            } catch (_: Exception) { "" }
+        }
+
+        @JavascriptInterface
+        fun pdfPageCount(assetId: String): Int {
+            return try {
+                val file = pdfFile(assetId) ?: return 0
+                PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)).use { it.pageCount }
+            } catch (_: Exception) { 0 }
+        }
+
+        @JavascriptInterface
+        fun renderPdfPage(assetId: String, pageIndex: Int): String {
+            return try {
+                val file = pdfFile(assetId) ?: return ""
+                PdfRenderer(ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)).use { renderer ->
+                    if (pageIndex !in 0 until renderer.pageCount) return ""
+                    renderer.openPage(pageIndex).use { page ->
+                        val scale = minOf(2.5f, 2400f / page.width.toFloat())
+                        val width = (page.width * scale).toInt().coerceAtLeast(1)
+                        val height = (page.height * scale).toInt().coerceAtLeast(1)
+                        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+                        val output = ByteArrayOutputStream()
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 88, output)
+                        bitmap.recycle()
+                        "data:image/jpeg;base64," + Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP)
+                    }
+                }
+            } catch (_: Exception) { "" }
+        }
+
+        private fun pdfFile(assetId: String): File? {
+            if (!assetId.matches(Regex("[0-9a-fA-F-]{36}"))) return null
+            return assetDir.listFiles()?.firstOrNull { it.name == "$assetId.pdf" }
+        }
     }
 
     private fun openPrintDialog() {
@@ -88,6 +165,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         filePathCallback?.onReceiveValue(null)
         filePathCallback = null
+        webView.removeJavascriptInterface("NativeTemplate")
         webView.removeJavascriptInterface("NativePrint")
         webView.destroy()
         super.onDestroy()
