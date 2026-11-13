@@ -1,12 +1,12 @@
 {
   "app": {
-    "name": "Document Studio",
+    "name": "ByteForge Studio",
     "tagline": "Your personal document workspace",
     "description": "Prepare, organize and print your documents in one calm, simple workspace."
   },
   "splash": {
     "eyebrow": "WELCOME TO",
-    "title": "Document Studio",
+    "title": "ByteForge Studio",
     "subtitle": "Prepare. Organize. Print.",
     "footer": "A clearer way to manage your documents",
     "durationMs": 2100,
@@ -14,7 +14,7 @@
   },
   "appearance": {
     "theme": "light",
-    "accent": "#10a37f",
+    "accent": "#14dfff",
     "cardStyle": "floating-white",
     "page": {
       "size": "A4 portrait",
