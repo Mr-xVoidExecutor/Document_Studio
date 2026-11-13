@@ -154,13 +154,18 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(page.canvas, 0, 0);
     state.words.forEach((word, index) => {
-      const b = word.bbox;
+      const b = word.targetBox || word.bbox;
       ctx.save();
       ctx.lineWidth = Math.max(2, canvas.width / 700);
       ctx.strokeStyle = index === state.selected ? '#ff7a00' : '#0b9b72';
       ctx.fillStyle = index === state.selected ? '#ff9c0022' : '#10a37f12';
       ctx.fillRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
       ctx.strokeRect(b.x0, b.y0, b.x1 - b.x0, b.y1 - b.y0);
+      if (index === state.selected) {
+        const handle = Math.max(9, canvas.width / 100);
+        ctx.fillStyle = '#ff7a00';
+        ctx.fillRect(b.x1 - handle / 2, b.y1 - handle / 2, handle, handle);
+      }
       ctx.restore();
     });
   }
@@ -170,10 +175,10 @@
     try {
       const worker = await ensureWorker();
       const result = await worker.recognize(currentPage().canvas);
-      state.words = (result.data.lines || []).filter(word => word.text && word.bbox && word.confidence > 12).map(word => ({
-        text: word.text, confidence: word.confidence,
-        bbox: { x0: word.bbox.x0, y0: word.bbox.y0, x1: word.bbox.x1, y1: word.bbox.y1 }
-      }));
+      state.words = (result.data.lines || []).filter(word => word.text && word.bbox && word.confidence > 12).map(word => {
+        const box = { x0: word.bbox.x0, y0: word.bbox.y0, x1: word.bbox.x1, y1: word.bbox.y1 };
+        return { text: word.text, confidence: word.confidence, bbox: box, targetBox: { ...box } };
+      });
       state.selected = -1;
       drawBoxes();
       status(state.words.length ? 'Detected ' + state.words.length + ' text regions. Tap a box to edit it.' : 'No clear text found. Try a sharper image or another language.');
@@ -210,8 +215,9 @@
     if (!word) return;
     state.selected = index;
     $('ocrText').value = word.text;
-    $('ocrFontSize').value = Math.max(6, Math.round((word.bbox.y1 - word.bbox.y0) * .82));
-    $('ocrColor').value = sampleColors(currentPage().canvas, word.bbox).color;
+    const box = word.targetBox || word.bbox;
+    $('ocrFontSize').value = Math.max(6, Math.round((box.y1 - box.y0) * .82));
+    $('ocrColor').value = sampleColors(currentPage().canvas, word.bbox || box).color;
     $('ocrApply').disabled = false;
     $('ocrDelete').disabled = false;
     drawBoxes();
@@ -220,31 +226,38 @@
     const word = state.words[state.selected];
     if (!word) return;
     const page = currentPage(), canvas = page.canvas, ctx = canvas.getContext('2d');
-    const b = word.bbox, pad = Math.max(2, Math.round((b.y1 - b.y0) * .12));
-    const x = Math.max(0, Math.floor(b.x0 - pad)), y = Math.max(0, Math.floor(b.y0 - pad));
-    const w = Math.min(canvas.width - x, Math.ceil(b.x1 - b.x0 + pad * 2));
-    const h = Math.min(canvas.height - y, Math.ceil(b.y1 - b.y0 + pad * 2));
-    const colors = sampleColors(canvas, b);
-    const repair = $('ocrRepair').value;
+    const source = word.bbox;
+    const target = word.targetBox || source;
+    const pad = Math.max(2, Math.round((target.y1 - target.y0) * .12));
+    const colors = sampleColors(canvas, source || target);
     ctx.save();
-    if (repair === 'white') ctx.fillStyle = '#ffffff';
-    else if (repair === 'manual') ctx.fillStyle = $('ocrBackground').value || '#ffffff';
-    else ctx.fillStyle = colors.background;
-    ctx.fillRect(x, y, w, h);
+    if (source) {
+      const x = Math.max(0, Math.floor(source.x0 - pad)), y = Math.max(0, Math.floor(source.y0 - pad));
+      const w = Math.min(canvas.width - x, Math.ceil(source.x1 - source.x0 + pad * 2));
+      const h = Math.min(canvas.height - y, Math.ceil(source.y1 - source.y0 + pad * 2));
+      const repair = $('ocrRepair').value;
+      if (repair === 'white') ctx.fillStyle = '#ffffff';
+      else if (repair === 'manual') ctx.fillStyle = $('ocrBackground').value || '#ffffff';
+      else ctx.fillStyle = colors.background;
+      ctx.fillRect(x, y, w, h);
+    }
     if (text) {
+      const x = Math.max(0, target.x0), y = Math.max(0, target.y0);
+      const w = Math.max(5, Math.min(canvas.width - x, target.x1 - target.x0));
+      const h = Math.max(6, Math.min(canvas.height - y, target.y1 - target.y0));
       const fontSize = Math.max(6, Math.min(180, Number($('ocrFontSize').value) || h * .8));
       ctx.fillStyle = $('ocrColor').value || colors.color;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
       ctx.font = fontSize + 'px "' + $('ocrFont').value.replace(/["\\]/g, '') + '"';
-      const content = text;
-      const maxWidth = Math.max(5, w - pad);
-      const measured = ctx.measureText(content).width;
-      if (measured > maxWidth) ctx.font = Math.max(6, fontSize * maxWidth / measured) + 'px "' + $('ocrFont').value.replace(/["\\]/g, '') + '"';
-      ctx.fillText(content, x + pad, y + h / 2, maxWidth);
+      const measured = ctx.measureText(text).width;
+      if (measured > w) ctx.font = Math.max(6, fontSize * w / measured) + 'px "' + $('ocrFont').value.replace(/["\\]/g, '') + '"';
+      ctx.fillText(text, x, y + h / 2, w);
     }
     ctx.restore();
     word.text = text;
+    if (source) word.bbox = { ...target };
+    word.targetBox = { ...target };
     drawBoxes();
   }
   function applyText() {
@@ -277,6 +290,45 @@
     drawBoxes();
     status('Page reset to the original upload. Scan again to edit text.');
   }
+  let dragState = null;
+  function pointerPosition(event) {
+    const canvas = $('ocrCanvas'), rect = canvas.getBoundingClientRect();
+    return { x: (event.clientX - rect.left) * canvas.width / rect.width, y: (event.clientY - rect.top) * canvas.height / rect.height };
+  }
+  function startBoxDrag(event) {
+    if (state.selected < 0 || state.addTextMode) return;
+    const word = state.words[state.selected], box = word && (word.targetBox || word.bbox);
+    if (!box) return;
+    const point = pointerPosition(event);
+    if (point.x < box.x0 || point.x > box.x1 || point.y < box.y0 || point.y > box.y1) return;
+    const edge = Math.max(16, $('ocrCanvas').width / 45);
+    dragState = { pointerId: event.pointerId, mode: point.x >= box.x1 - edge && point.y >= box.y1 - edge ? 'resize' : 'move', start: point, box: { ...box } };
+    $('ocrCanvas').setPointerCapture(event.pointerId);
+    event.preventDefault();
+  }
+  function moveBox(event) {
+    if (!dragState || dragState.pointerId !== event.pointerId) return;
+    const point = pointerPosition(event), word = state.words[state.selected];
+    if (!word) return;
+    const dx = point.x - dragState.start.x, dy = point.y - dragState.start.y;
+    const box = { ...dragState.box };
+    if (dragState.mode === 'move') {
+      const width = box.x1 - box.x0, height = box.y1 - box.y0;
+      box.x0 = Math.max(0, Math.min($('ocrCanvas').width - width, box.x0 + dx));
+      box.y0 = Math.max(0, Math.min($('ocrCanvas').height - height, box.y0 + dy));
+      box.x1 = box.x0 + width; box.y1 = box.y0 + height;
+    } else {
+      box.x1 = Math.max(box.x0 + 8, Math.min($('ocrCanvas').width, box.x1 + dx));
+      box.y1 = Math.max(box.y0 + 8, Math.min($('ocrCanvas').height, box.y1 + dy));
+    }
+    word.targetBox = box;
+    dragState.start = point;
+    dragState.box = { ...box };
+    drawBoxes();
+  }
+  function endBoxDrag(event) {
+    if (dragState && dragState.pointerId === event.pointerId) dragState = null;
+  }
   function canvasClick(event) {
     const canvas = $('ocrCanvas'), rect = canvas.getBoundingClientRect();
     const x = (event.clientX - rect.left) * canvas.width / rect.width;
@@ -287,7 +339,7 @@
       if (!value) return;
       const height = Math.max(18, Number($('ocrFontSize').value) || 24);
       const box = { x0: x, y0: y - height, x1: Math.min(canvas.width, x + 320), y1: y + 5 };
-      state.words.push({ text: value, bbox: box, confidence: 100 });
+      state.words.push({ text: value, bbox: null, targetBox: box, confidence: 100 });
       state.selected = state.words.length - 1;
       $('ocrText').value = value;
       $('ocrApply').disabled = false;
@@ -357,6 +409,10 @@
     $('ocrSaveImage').addEventListener('click', exportImage);
     $('ocrSavePdf').addEventListener('click', exportPdf);
     $('ocrCanvas').addEventListener('click', canvasClick);
+    $('ocrCanvas').addEventListener('pointerdown', startBoxDrag);
+    $('ocrCanvas').addEventListener('pointermove', moveBox);
+    $('ocrCanvas').addEventListener('pointerup', endBoxDrag);
+    $('ocrCanvas').addEventListener('pointercancel', endBoxDrag);
   }
   document.addEventListener('DOMContentLoaded', bind);
   window.OCREditor = { open, close };
