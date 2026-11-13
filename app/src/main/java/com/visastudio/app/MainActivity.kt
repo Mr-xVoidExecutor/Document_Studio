@@ -91,6 +91,20 @@ class MainActivity : AppCompatActivity() {
     private inner class AuthBridge {
         private val prefs by lazy { getSharedPreferences("document_studio_auth", Context.MODE_PRIVATE) }
         private val iterations = 120_000
+        init {
+            // One-time migration: install the owner's preconfigured local account.
+            // Only the PBKDF2 hash and salt are stored; the plaintext password is not in the app.
+            if (!prefs.getBoolean("default_credentials_v1", false)) {
+                prefs.edit()
+                    .putString("username", "mohammadlimon007")
+                    .putString("password_salt", "RaaiC2621Zo+XCZ3ySzAdQ==")
+                    .putString("password_hash", "g0v/Rclc/Ng6KJgdgvHFf14pCugqhm7TIYjXiyaOlds=")
+                    .putBoolean("default_credentials_v1", true)
+                    .putInt("failed_attempts", 0)
+                    .putLong("locked_until", 0L)
+                    .apply()
+            }
+        }
         @JavascriptInterface fun hasCredentials(): Boolean = !prefs.getString("password_hash", null).isNullOrBlank()
         @JavascriptInterface fun setup(username: String, password: String): Boolean {
             return try {
