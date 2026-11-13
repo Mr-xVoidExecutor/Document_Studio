@@ -9,6 +9,31 @@
 <main id="landing">
 <header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1 id="brandTitle">Document Studio</h1><p id="brandDescription">Prepare, organize and print your documents in one calm, simple workspace.</p></header>
 <section class="grid" id="documentGrid" aria-label="Document workspaces"></section>
+<section class="ocr-hub" id="ocrHub">
+  <div class="ocr-hub-head"><div><span class="eyebrow">IMAGE & DOCUMENT TOOLS</span><h2>OCR Text Editor</h2><p>Scan text in your own images or PDF pages, select a detected word, and edit its visible text.</p></div><button type="button" class="template-primary" onclick="OCREditor.open()">Open OCR editor</button></div>
+  <p class="ocr-safety-note">For correcting your own images and designs. Do not alter IDs, certificates, receipts, contracts or official records to mislead others. Visual font/background matching is an estimate, not a guaranteed exact restoration.</p>
+</section>
+<section id="ocrEditor" class="ocr-editor" hidden aria-label="OCR text editor">
+  <div class="ocr-toolbar"><button type="button" class="back" onclick="OCREditor.close()">← Back</button><strong>OCR Text Editor</strong><label class="ocr-upload">Upload image / PDF<input id="ocrFile" type="file" accept="image/jpeg,image/png,image/webp,application/pdf"></label></div>
+  <div class="ocr-workspace">
+    <aside class="ocr-controls">
+      <p class="ocr-intro">Upload an image or PDF. Scan a page, then select a detected text box on the canvas.</p>
+      <label class="ocr-control-label">PDF page<select id="ocrPage" disabled><option value="0">Page 1</option></select></label>
+      <button type="button" class="template-primary" id="ocrScan">Scan text (OCR)</button>
+      <label class="ocr-control-label">Selected text<textarea id="ocrText" rows="3" placeholder="Select a detected text box first"></textarea></label>
+      <label class="ocr-control-label">Text color<input id="ocrColor" type="color" value="#202020"></label>
+      <label class="ocr-control-label">Font size (px)<input id="ocrFontSize" type="number" min="6" max="180" value="18"></label>
+      <label class="ocr-control-label">Font style<select id="ocrFont"><option value="Arial">Arial</option><option value="Georgia">Georgia</option><option value="Times New Roman">Times New Roman</option><option value="Verdana">Verdana</option><option value="Tahoma">Tahoma</option></select></label>
+      <label class="ocr-control-label">Background repair<select id="ocrRepair"><option value="sample">Sample nearby background</option><option value="white">White fill</option><option value="blur">Soft blur fill</option></select></label>
+      <div class="ocr-button-row"><button type="button" class="template-secondary" id="ocrApply" disabled>Apply text</button><button type="button" class="template-secondary" id="ocrDelete" disabled>Remove text</button></div>
+      <div class="ocr-button-row"><button type="button" class="template-secondary" id="ocrAddText">＋ Add text</button><button type="button" class="template-secondary" id="ocrReset">Reset page</button></div>
+      <div class="ocr-button-row"><button type="button" class="template-primary" id="ocrSaveImage">Export PNG</button><button type="button" class="template-primary" id="ocrSavePdf">Export PDF</button></div>
+      <p id="ocrStatus" class="ocr-status" role="status">Choose an image or PDF to begin.</p>
+      <p class="ocr-footnote">OCR accuracy depends on image quality and language. Original font and complex backgrounds may not be reproduced exactly. PDF export keeps page appearance as images; searchable text layers are not preserved.</p>
+    </aside>
+    <div class="ocr-canvas-scroll"><div class="ocr-canvas-wrap"><canvas id="ocrCanvas" aria-label="OCR image editing canvas"></canvas><div id="ocrEmpty" class="ocr-empty">Your image or PDF page will appear here.</div></div></div>
+  </div>
+</section>
 <section class="template-hub" id="templateHub">
   <div class="template-hub-head"><div><span class="eyebrow">CUSTOM LAYOUTS</span><h2>PDF / Image Templates</h2><p>Import a document page, place reusable fields, then fill it again whenever needed.</p></div><button class="template-primary" type="button" onclick="TemplateStudio.chooseFile()">＋ Create template</button></div>
   <div id="savedTemplates" class="saved-templates"><p class="template-empty">No custom templates yet. Import a PDF or image to get started.</p></div>
@@ -161,4 +186,5 @@ function printDocument(){if(window.NativePrint&&window.NativePrint.printDocument
 function goBack(){document.getElementById('studio').style.display='none';document.getElementById('landing').style.display='block';current='';}
 </script>
 <script src="js/template-import.js"></script>
+<script src="js/ocr-editor.js"></script>
 </body></html>
