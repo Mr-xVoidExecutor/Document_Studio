@@ -137,13 +137,13 @@ function printFilled() {
  if (window.NativePrint?.printDocument) window.NativePrint.printDocument();
  else { window.print(); document.body.classList.remove('template-print-mode'); }
 }
-function close() { $('templateEditor').hidden=true; $('landing').style.display='block';$('studio').style.display='none';showHub(); }
+function close() { $('templateEditor').hidden=true; $('studio').style.display='none';showHub();if(window.AppShell)AppShell.backToModule('templates');else $('landing').style.display='block'; }
 function save() {
  if (mode!=='edit') return;
  active.name=$('templateName').value.trim()||'Untitled template';
  const list=readTemplates(),index=list.findIndex(t=>t.id===active.id);
  const copy=JSON.parse(JSON.stringify(active)); if(index>=0)list[index]=copy;else list.push(copy);
- try{writeTemplates(list);alert('Template saved on this device. You can fill it again from the template list.');showHub();$('templateEditor').hidden=true;$('landing').style.display='block';}
+ try{writeTemplates(list);alert('Template saved on this device. You can fill it again from the template list.');showHub();$('templateEditor').hidden=true;if(window.AppShell)AppShell.backToModule('templates');else $('landing').style.display='block';}
  catch(_){alert('Could not save template details. Please reduce the number of fields or pages.');}
 }
 function nextPage() {
