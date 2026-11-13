@@ -84,27 +84,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private inner class TemplateBridge {
+        private data class PendingExport(
+            val file: File,
+            val output: FileOutputStream,
+            val mime: String,
+            val name: String,
+            var size: Long = 0
+        )
+        private val pendingExports = mutableMapOf<String, PendingExport>()
+
         @JavascriptInterface
-        fun saveExport(dataUrl: String, fileName: String): String {
+        fun beginExport(fileName: String, mime: String): String {
             return try {
-                val comma = dataUrl.indexOf(',')
-                if (comma <= 0 || dataUrl.length > 70_000_000) return ""
-                val header = dataUrl.substring(0, comma)
-                if (!header.startsWith("data:") || !header.contains(";base64")) return ""
-                val mime = when {
-                    header.contains("application/pdf") -> "application/pdf"
-                    header.contains("image/png") -> "image/png"
-                    header.contains("image/jpeg") -> "image/jpeg"
-                    else -> return ""
-                }
-                val bytes = Base64.decode(dataUrl.substring(comma + 1), Base64.DEFAULT)
-                if (bytes.isEmpty() || bytes.size > 50 * 1024 * 1024) return ""
-                val valid = when (mime) {
-                    "application/pdf" -> bytes.size >= 5 && String(bytes, 0, 5, Charsets.US_ASCII) == "%PDF-"
-                    "image/png" -> bytes.size >= 8 && bytes.take(8).toByteArray().contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
-                    else -> bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte()
-                }
-                if (!valid) return ""
+                if (mime !in setOf("application/pdf", "image/png", "image/jpeg")) return ""
                 val extension = when (mime) {
                     "application/pdf" -> "pdf"
                     "image/png" -> "png"
@@ -113,25 +105,70 @@ class MainActivity : AppCompatActivity() {
                 val safeBase = fileName.substringAfterLast('/').substringAfterLast('\\')
                     .replace(Regex("[^A-Za-z0-9._-]"), "_")
                     .take(72).substringBeforeLast('.', fileName).ifBlank { "Document-Studio-export" }
-                val safeName = "$safeBase.$extension"
+                val name = "$safeBase.$extension"
+                val token = UUID.randomUUID().toString()
+                val file = File(cacheDir, "$token.export-part")
+                val pending = PendingExport(file, FileOutputStream(file), mime, name)
+                synchronized(pendingExports) { pendingExports[token] = pending }
+                token
+            } catch (_: Exception) { "" }
+        }
+
+        @JavascriptInterface
+        fun appendExport(token: String, base64Chunk: String): Boolean {
+            return try {
+                if (!token.matches(Regex("[0-9a-fA-F-]{36}")) || base64Chunk.isBlank() || base64Chunk.length > 160_000) return false
+                val pending = synchronized(pendingExports) { pendingExports[token] } ?: return false
+                val bytes = Base64.decode(base64Chunk, Base64.DEFAULT)
+                if (pending.size + bytes.size > 50L * 1024 * 1024) return false
+                pending.output.write(bytes)
+                pending.size += bytes.size
+                true
+            } catch (_: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun finishExport(token: String): String {
+            val pending = synchronized(pendingExports) { pendingExports.remove(token) } ?: return ""
+            return try {
+                pending.output.close()
+                if (pending.size <= 0 || pending.size > 50L * 1024 * 1024) return ""
+                val signature = ByteArray(8)
+                val count = pending.file.inputStream().use { it.read(signature) }
+                val valid = when (pending.mime) {
+                    "application/pdf" -> count >= 5 && String(signature, 0, 5, Charsets.US_ASCII) == "%PDF-"
+                    "image/png" -> count >= 8 && signature.contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
+                    else -> count >= 3 && signature[0] == 0xFF.toByte() && signature[1] == 0xD8.toByte() && signature[2] == 0xFF.toByte()
+                }
+                if (!valid) return ""
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     val values = ContentValues().apply {
-                        put(MediaStore.Downloads.DISPLAY_NAME, safeName)
-                        put(MediaStore.Downloads.MIME_TYPE, mime)
+                        put(MediaStore.Downloads.DISPLAY_NAME, pending.name)
+                        put(MediaStore.Downloads.MIME_TYPE, pending.mime)
                         put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Document Studio")
                         put(MediaStore.Downloads.IS_PENDING, 1)
                     }
                     val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return ""
-                    contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: return ""
+                    contentResolver.openOutputStream(uri)?.use { output ->
+                        pending.file.inputStream().use { input -> input.copyTo(output) }
+                    } ?: return ""
                     val ready = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
                     contentResolver.update(uri, ready, null, null)
                 } else {
                     val folder = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Document Studio").apply { mkdirs() }
-                    FileOutputStream(File(folder, safeName)).use { it.write(bytes) }
+                    pending.file.copyTo(File(folder, pending.name), overwrite = true)
                 }
-                runOnUiThread { Toast.makeText(this@MainActivity, "Saved: $safeName", Toast.LENGTH_LONG).show() }
-                safeName
+                runOnUiThread { Toast.makeText(this@MainActivity, "Saved: ${pending.name}", Toast.LENGTH_LONG).show() }
+                pending.name
             } catch (_: Exception) { "" }
+            finally { pending.file.delete() }
+        }
+
+        @JavascriptInterface
+        fun cancelExport(token: String) {
+            val pending = synchronized(pendingExports) { pendingExports.remove(token) }
+            try { pending?.output?.close() } catch (_: Exception) { }
+            pending?.file?.delete()
         }
 
         @JavascriptInterface
