@@ -2,6 +2,11 @@ package com.visastudio.app
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.ContentValues
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
+import android.widget.Toast
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
@@ -79,6 +84,56 @@ class MainActivity : AppCompatActivity() {
     }
 
     private inner class TemplateBridge {
+        @JavascriptInterface
+        fun saveExport(dataUrl: String, fileName: String): String {
+            return try {
+                val comma = dataUrl.indexOf(',')
+                if (comma <= 0 || dataUrl.length > 70_000_000) return ""
+                val header = dataUrl.substring(0, comma)
+                if (!header.startsWith("data:") || !header.contains(";base64")) return ""
+                val mime = when {
+                    header.contains("application/pdf") -> "application/pdf"
+                    header.contains("image/png") -> "image/png"
+                    header.contains("image/jpeg") -> "image/jpeg"
+                    else -> return ""
+                }
+                val bytes = Base64.decode(dataUrl.substring(comma + 1), Base64.DEFAULT)
+                if (bytes.isEmpty() || bytes.size > 50 * 1024 * 1024) return ""
+                val valid = when (mime) {
+                    "application/pdf" -> bytes.size >= 5 && String(bytes, 0, 5, Charsets.US_ASCII) == "%PDF-"
+                    "image/png" -> bytes.size >= 8 && bytes.take(8).toByteArray().contentEquals(byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A))
+                    else -> bytes.size >= 3 && bytes[0] == 0xFF.toByte() && bytes[1] == 0xD8.toByte() && bytes[2] == 0xFF.toByte()
+                }
+                if (!valid) return ""
+                val extension = when (mime) {
+                    "application/pdf" -> "pdf"
+                    "image/png" -> "png"
+                    else -> "jpg"
+                }
+                val safeBase = fileName.substringAfterLast('/').substringAfterLast('\\')
+                    .replace(Regex("[^A-Za-z0-9._-]"), "_")
+                    .take(72).substringBeforeLast('.', fileName).ifBlank { "Document-Studio-export" }
+                val safeName = "$safeBase.$extension"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    val values = ContentValues().apply {
+                        put(MediaStore.Downloads.DISPLAY_NAME, safeName)
+                        put(MediaStore.Downloads.MIME_TYPE, mime)
+                        put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/Document Studio")
+                        put(MediaStore.Downloads.IS_PENDING, 1)
+                    }
+                    val uri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return ""
+                    contentResolver.openOutputStream(uri)?.use { it.write(bytes) } ?: return ""
+                    val ready = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+                    contentResolver.update(uri, ready, null, null)
+                } else {
+                    val folder = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), "Document Studio").apply { mkdirs() }
+                    FileOutputStream(File(folder, safeName)).use { it.write(bytes) }
+                }
+                runOnUiThread { Toast.makeText(this@MainActivity, "Saved: $safeName", Toast.LENGTH_LONG).show() }
+                safeName
+            } catch (_: Exception) { "" }
+        }
+
         @JavascriptInterface
         fun saveAsset(dataUrl: String, extension: String): String {
             return try {
