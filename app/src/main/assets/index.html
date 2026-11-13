@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ffffff">
-<title>Document Studio</title><link rel="stylesheet" href="css/style.css">
+<title>ByteForge Studio</title><link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<div id="splash" class="splash-screen" role="status" aria-label="Loading Document Studio"><div class="splash-orb"><span class="splash-mark">D</span></div><p class="splash-eyebrow" id="splashEyebrow">WELCOME TO</p><h1 id="splashTitle">Document Studio</h1><p class="splash-subtitle" id="splashSubtitle">Prepare. Organize. Print.</p><div class="splash-loader"><span></span></div><small id="splashFooter">A clearer way to manage your documents</small></div>
+<div id="splash" class="splash-screen" role="status" aria-label="Loading ByteForge Studio"><div class="splash-orb"><span class="splash-mark">D</span></div><p class="splash-eyebrow" id="splashEyebrow">WELCOME TO</p><h1 id="splashTitle">ByteForge Studio</h1><p class="splash-subtitle" id="splashSubtitle">Prepare. Organize. Print.</p><div class="splash-loader"><span></span></div><small id="splashFooter">A clearer way to manage your documents</small></div>
 <main id="landing">
-<header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1 id="brandTitle">Document Studio</h1><p id="brandDescription">Prepare, organize and print your documents in one calm, simple workspace.</p></header>
+<header class="hero"><span class="eyebrow">PRIVATE DOCUMENT WORKSPACE</span><h1 id="brandTitle">ByteForge Studio</h1><p id="brandDescription">Prepare, organize and print your documents in one calm, simple workspace.</p></header>
 <section class="grid" id="documentGrid" aria-label="Document workspaces"></section>
 <section class="ocr-hub" id="ocrHub">
   <div class="ocr-hub-head"><div><span class="eyebrow">IMAGE & DOCUMENT TOOLS</span><h2>OCR Text Editor</h2><p>Scan text in your own images or PDF pages, select a detected word, and edit its visible text.</p></div><button type="button" class="template-primary" onclick="OCREditor.open()">Open OCR editor</button></div>
@@ -71,7 +71,7 @@
 <script>
 'use strict';
 function loadAppConfig(){
- const fallback={app:{name:'Document Studio',description:'Prepare, organize and print your documents in one workspace.'},splash:{eyebrow:'WELCOME TO',title:'Document Studio',subtitle:'Prepare. Organize. Print.',footer:'A clearer way to manage your documents',durationMs:2100},documents:[
+ const fallback={app:{name:'ByteForge Studio',description:'Prepare, organize and print your documents in one workspace.'},splash:{eyebrow:'WELCOME TO',title:'ByteForge Studio',subtitle:'Prepare. Organize. Print.',footer:'A clearer way to manage your documents',durationMs:2100},documents:[
 {id:'subclass482',number:'01',icon:'▤',title:'Subclass 482 Preparation',description:'Organize personal, passport and employment details for your application.',action:'Open workspace'},
 {id:'offerLetter',number:'02',icon:'✉',title:'Employment Offer Draft',description:'Prepare an employer-editable offer letter using verified information.',action:'Open workspace'},
 {id:'workPermit',number:'03',icon:'▣',title:'Work Details Record',description:'Keep employment and sponsorship details together in one place.',action:'Open workspace'},
@@ -92,11 +92,11 @@ function applyAppConfig(){
  if(type.titleSize)root.style.setProperty('--sheet-title-size',type.titleSize);
  if(type.bodySize)root.style.setProperty('--sheet-body-size',type.bodySize);
  if(type.labelSize)root.style.setProperty('--sheet-label-size',type.labelSize);
- document.title=app.name||'Document Studio';
- document.getElementById('brandTitle').textContent=app.name||'Document Studio';
+ document.title=app.name||'ByteForge Studio';
+ document.getElementById('brandTitle').textContent=app.name||'ByteForge Studio';
  document.getElementById('brandDescription').textContent=app.description||'Your personal document workspace.';
  document.getElementById('splashEyebrow').textContent=splash.eyebrow||'WELCOME TO';
- document.getElementById('splashTitle').textContent=splash.title||app.name||'Document Studio';
+ document.getElementById('splashTitle').textContent=splash.title||app.name||'ByteForge Studio';
  document.getElementById('splashSubtitle').textContent=splash.subtitle||app.tagline||'Prepare. Organize. Print.';
  document.getElementById('splashFooter').textContent=splash.footer||'A clearer way to manage your documents';
  document.getElementById('documentGrid').innerHTML=(appConfig.documents||[]).map(doc=>'<article class="card"><div class="card-top"><span class="card-icon" aria-hidden="true">'+esc(doc.icon||'▤')+'</span><span class="number">'+esc(doc.number||'')+'</span></div><div class="card-copy"><h2>'+esc(doc.title)+'</h2><p>'+esc(doc.description)+'</p></div><button type="button" onclick="openDoc(\''+esc(doc.id)+'\')">'+esc(doc.action||'Open workspace')+'<b aria-hidden="true">→</b></button></article>').join('');
