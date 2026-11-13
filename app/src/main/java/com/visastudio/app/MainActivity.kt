@@ -361,6 +361,14 @@ class MainActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated API retained for backward compatibility")
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) webView.goBack() else super.onBackPressed()
+        if (!::webView.isInitialized) {
+            super.onBackPressed()
+            return
+        }
+        webView.evaluateJavascript(
+            "window.AppShell && window.AppShell.handleSystemBack ? window.AppShell.handleSystemBack() : false"
+        ) { handled ->
+            if (handled != "true") finish()
+        }
     }
 }
