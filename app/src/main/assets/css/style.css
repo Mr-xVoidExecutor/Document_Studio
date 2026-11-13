@@ -115,3 +115,24 @@
 @media(max-width:850px){.module-grid{grid-template-columns:1fr}.module-card{min-height:180px}.dashboard{padding:35px 16px}.pdf-layout{grid-template-columns:245px minmax(0,1fr)}}@media(max-width:650px){.auth-card{padding:24px}.dashboard-head{align-items:flex-start}.pdf-topbar{flex-wrap:wrap}.pdf-topbar>div{order:-1;flex-basis:100%}.pdf-layout{grid-template-columns:1fr;grid-template-rows:minmax(220px,45vh) minmax(0,1fr)}.pdf-sidebar{order:2;border-top:1px solid #e2e8e3;border-right:0}.pdf-stage{order:1;padding:12px}.pdf-canvas-wrap{width:100%;padding:5px}.pdf-canvas-wrap canvas{width:100%;height:auto}}
 
 .module-nav{max-width:1180px;margin:0 auto 16px;padding:0 30px;display:flex;align-items:center;gap:12px;color:#8a938d;font-size:10px}.module-nav button{background:#fff}@media(max-width:700px){.module-nav{padding:0 16px}}
+
+/* ByteForge Studio visual system: logo watermark and neon motion */
+:root{--accent:#19d9ff;--accent-soft:#0b2d3a;--ink:#e7f5ff;--muted:#9bb3c1;--line:#24404d;--page:#050c13;--white:#0d1822;--shadow:0 10px 32px rgba(0,0,0,.34);--shadow-hover:0 18px 44px rgba(0,205,255,.16);--motion-screen:520ms;--motion-button:180ms}
+html,body{background:#050c13;color:#e7f5ff}
+body{isolation:isolate}body:before{content:"";position:fixed;z-index:-1;inset:0;pointer-events:none;background-image:url('../brand/byteforge-mark.svg');background-repeat:no-repeat;background-position:center;background-size:min(78vw,680px);opacity:.105;filter:saturate(1.15)}
+.splash-screen{background:radial-gradient(ellipse at center,#102635 0,#050c13 72%);color:#e7f5ff}.splash-orb{background:transparent;box-shadow:none;width:128px;height:128px;border-radius:30px;animation:bfLogoFloat 2.6s ease-in-out infinite}.splash-mark{display:block;width:128px;height:128px;font-size:0;background:url('../brand/byteforge-mark.svg') center/contain no-repeat;filter:drop-shadow(0 0 16px #15dfff80)}.splash-screen h1,.hero h1{color:#e8faff;text-shadow:0 0 24px #18cfff2b}.splash-eyebrow,.splash-subtitle,.splash-screen small{color:#8fb6c7}.splash-loader{background:#193443}.splash-loader span{background:#1ce5ff;box-shadow:0 0 12px #1ce5ff}
+#landing,.dashboard,.pdf-editor{color:#e7f5ff}.hero p,.dashboard-head p{color:#9bb3c1}.eyebrow,.top-kicker,.module-number{color:#39e6ff}
+.module-card,.auth-card,.pdf-sidebar,.pdf-topbar,.template-hub,.ocr-hub,.template-editor,.ocr-editor{background:rgba(9,22,32,.94)!important;color:#e7f5ff;border-color:#254454!important;backdrop-filter:blur(12px)}
+.module-card strong,.auth-card h1,.pdf-tool-group h3,.pdf-topbar strong{color:#eafaff}.module-card small,.auth-card small,.pdf-hint,.pdf-status{color:#9ab6c4}.module-icon{background:#103443;color:#32e5ff;box-shadow:inset 0 0 18px #11dfff18}.module-card:hover{border-color:#19dfff!important;box-shadow:0 0 28px #11cfff24}.dashboard-foot{color:#668696}
+.auth-card input,.pdf-tool-group input,.pdf-tool-group select,.pdf-tool-group textarea{background:#07131d;color:#e7f5ff;border-color:#29495a}.pdf-status{background:#0b2633}.pdf-stage{background:#07121b}.pdf-canvas-wrap{background:#fff}
+button,.template-primary,.template-secondary,.back,.module-card{transition:transform var(--motion-button) cubic-bezier(.2,.8,.2,1),box-shadow var(--motion-button) ease,border-color var(--motion-button) ease,filter var(--motion-button) ease}
+button:not(:disabled):hover{transform:translateY(-2px);filter:brightness(1.12);box-shadow:0 0 20px #13dfff24}
+button:not(:disabled):active{transform:translateY(1px) scale(.97);filter:brightness(1.2)}
+.template-primary{background:linear-gradient(110deg,#087fa7,#13cce9)!important;color:#001018!important;border:1px solid #54eaff!important;box-shadow:0 5px 20px #05cfff28}
+.template-secondary,.back{background:#0b202c!important;color:#bfefff!important;border:1px solid #28566b!important}
+.auth-mark{width:92px;height:92px;padding:0;background:transparent!important;box-shadow:none!important}.auth-mark img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 14px #0edfff5a)}
+.module-nav{color:#83a8b8}.module-nav button{background:#0b202c}
+.screen-enter #appDashboard:not([hidden]),.screen-enter #landing:not([style*="display: none"]),.screen-enter #pdfEditor:not([hidden]),.screen-enter #loginScreen:not([hidden]){animation:byteForgeEnter var(--motion-screen) cubic-bezier(.2,.8,.2,1) both}
+@keyframes byteForgeEnter{from{opacity:0;transform:translate3d(0,18px,0) scale(.985);filter:blur(3px)}to{opacity:1;transform:translate3d(0,0,0) scale(1);filter:blur(0)}}
+@keyframes bfLogoFloat{0%,100%{transform:translateY(0) scale(1);filter:drop-shadow(0 0 9px #12dfff55)}50%{transform:translateY(-6px) scale(1.025);filter:drop-shadow(0 0 20px #12dfff9c)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}}
