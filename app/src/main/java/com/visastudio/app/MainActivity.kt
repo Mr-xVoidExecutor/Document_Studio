@@ -83,14 +83,15 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("file:///android_asset/index.html")
     }
 
+    private data class PendingExport(
+        val file: File,
+        val output: FileOutputStream,
+        val mime: String,
+        val name: String,
+        var size: Long = 0
+    )
+
     private inner class TemplateBridge {
-        private data class PendingExport(
-            val file: File,
-            val output: FileOutputStream,
-            val mime: String,
-            val name: String,
-            var size: Long = 0
-        )
         private val pendingExports = mutableMapOf<String, PendingExport>()
 
         @JavascriptInterface
