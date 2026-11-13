@@ -256,7 +256,7 @@
     }
     ctx.restore();
     word.text = text;
-    if (source) word.bbox = { ...target };
+    word.bbox = { ...target };
     word.targetBox = { ...target };
     drawBoxes();
   }
