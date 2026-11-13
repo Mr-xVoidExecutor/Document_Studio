@@ -34,7 +34,7 @@ jobs:
           from pathlib import Path
           import re
           html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
-          scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>(.*?)</script>', html, re.I | re.S)
+          scripts = re.findall(r'<script(?![^>]*\bsrc=)[^>]*>(.*?)</script>', html, re.I | re.S)
           if len(scripts) != 1:
               raise SystemExit(f"Expected one inline application script, found {len(scripts)}")
           Path("/tmp/document-studio-inline.js").write_text(scripts[0], encoding="utf-8")
