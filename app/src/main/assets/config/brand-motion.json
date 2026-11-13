@@ -1,0 +1,11 @@
+{
+  "brand": "ByteForge Studio",
+  "visual": "dark-forged-metal-neon-cyan",
+  "motion": {
+    "screenEnter": {"type":"fade-scale-slide","durationMs":520,"easing":"cubic-bezier(0.2,0.8,0.2,1)","distancePx":18},
+    "buttonHover": {"type":"lift-glow","durationMs":180,"distancePx":-3},
+    "buttonPress": {"type":"press-spring","durationMs":130,"scale":0.96},
+    "logo": {"type":"neon-pulse-float","durationMs":2600,"loop":true},
+    "reducedMotion": "respect-system-preference"
+  }
+}
