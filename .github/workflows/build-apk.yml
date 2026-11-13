@@ -47,6 +47,8 @@ jobs:
           PY
           node --check /tmp/document-studio-inline.js
           python -m json.tool app/src/main/assets/config/app-config.json > /dev/null
+          python -m json.tool app/src/main/assets/config/brand-motion.json > /dev/null
+          test -s app/src/main/assets/brand/byteforge-mark.svg
           grep -q 'SAMPLE' app/src/main/assets/index.html
           grep -q 'NativeTemplate' app/src/main/java/com/visastudio/app/MainActivity.kt
           grep -q 'printDocument' app/src/main/java/com/visastudio/app/MainActivity.kt
