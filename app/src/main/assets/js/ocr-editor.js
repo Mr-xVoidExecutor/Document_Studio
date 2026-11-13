@@ -35,8 +35,8 @@
   }
   function close() {
     $('ocrEditor').hidden = true;
-    $('landing').style.display = 'block';
     state.addTextMode = false;
+    if (window.AppShell) AppShell.backToModule('templates'); else $('landing').style.display = 'block';
   }
   function currentPage() { return state.pages[state.pageIndex]; }
   function fitCanvas(source, maxEdge) {
