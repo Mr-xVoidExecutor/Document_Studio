@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const $ = id => document.getElementById(id);
-  const state = { pages: [], pageIndex: 0, words: [], selected: -1, worker: null, addTextMode: false, originalFileName: 'edited-image' };
+  const state = { pages: [], pageIndex: 0, words: [], selected: -1, worker: null, workerLang: '', addTextMode: false, originalFileName: 'edited-image' };
   const CDN = {
     tesseract: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.0.5/dist/tesseract.min.js',
     pdf: 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
@@ -130,13 +130,19 @@
   }
   async function ensureWorker() {
     await loadScript(CDN.tesseract, 'Tesseract');
+    const language = $('ocrLanguage').value || 'eng+ben';
+    if (state.worker && state.workerLang !== language) {
+      await state.worker.terminate();
+      state.worker = null;
+    }
     if (!state.worker) {
-      state.worker = await window.Tesseract.createWorker('eng+ben', 1, {
+      state.worker = await window.Tesseract.createWorker(language, 1, {
         logger: event => {
           if (event.status === 'recognizing text' && event.progress != null) status('Recognizing text… ' + Math.round(event.progress * 100) + '%');
           else if (event.status) status(event.status + '…');
         }
       });
+      state.workerLang = language;
     }
     return state.worker;
   }
@@ -164,7 +170,7 @@
     try {
       const worker = await ensureWorker();
       const result = await worker.recognize(currentPage().canvas);
-      state.words = (result.data.words || []).filter(word => word.text && word.bbox && word.confidence > 12).map(word => ({
+      state.words = (result.data.lines || []).filter(word => word.text && word.bbox && word.confidence > 12).map(word => ({
         text: word.text, confidence: word.confidence,
         bbox: { x0: word.bbox.x0, y0: word.bbox.y0, x1: word.bbox.x1, y1: word.bbox.y1 }
       }));
@@ -222,6 +228,7 @@
     const repair = $('ocrRepair').value;
     ctx.save();
     if (repair === 'white') ctx.fillStyle = '#ffffff';
+    else if (repair === 'manual') ctx.fillStyle = $('ocrBackground').value || '#ffffff';
     else ctx.fillStyle = colors.background;
     ctx.fillRect(x, y, w, h);
     if (text) {
