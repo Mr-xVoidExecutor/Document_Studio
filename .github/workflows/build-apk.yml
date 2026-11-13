@@ -32,6 +32,10 @@ jobs:
           node --check app/src/main/assets/js/template-import.js
           test -s app/src/main/assets/js/ocr-editor.js
           node --check app/src/main/assets/js/ocr-editor.js
+          test -s app/src/main/assets/js/app-shell.js
+          node --check app/src/main/assets/js/app-shell.js
+          test -s app/src/main/assets/js/pdf-editor.js
+          node --check app/src/main/assets/js/pdf-editor.js
           python - <<'PY'
           from pathlib import Path
           import re
