@@ -30,6 +30,8 @@ jobs:
           test -s app/src/main/assets/css/style.css
           test -s app/src/main/assets/js/template-import.js
           node --check app/src/main/assets/js/template-import.js
+          test -s app/src/main/assets/js/ocr-editor.js
+          node --check app/src/main/assets/js/ocr-editor.js
           python - <<'PY'
           from pathlib import Path
           import re
