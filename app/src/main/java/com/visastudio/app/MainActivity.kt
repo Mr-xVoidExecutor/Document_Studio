@@ -27,6 +27,10 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
+import java.security.MessageDigest
+import java.security.SecureRandom
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
 class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
@@ -76,11 +80,53 @@ class MainActivity : AppCompatActivity() {
             }
         }
         webView.addJavascriptInterface(TemplateBridge(), "NativeTemplate")
+        webView.addJavascriptInterface(AuthBridge(), "NativeAuth")
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun printDocument() { runOnUiThread { openPrintDialog() } }
         }, "NativePrint")
         webView.loadUrl("file:///android_asset/index.html")
+    }
+
+    private inner class AuthBridge {
+        private val prefs by lazy { getSharedPreferences("document_studio_auth", Context.MODE_PRIVATE) }
+        private val iterations = 120_000
+        @JavascriptInterface fun hasCredentials(): Boolean = !prefs.getString("password_hash", null).isNullOrBlank()
+        @JavascriptInterface fun setup(username: String, password: String): Boolean {
+            return try {
+                val user = username.trim().lowercase()
+                if (hasCredentials() || user.length !in 3..40 || !user.matches(Regex("[a-z0-9._-]+")) || password.length !in 8..128) return false
+                val salt = ByteArray(16).also { SecureRandom().nextBytes(it) }
+                val hash = derive(password, salt)
+                prefs.edit().putString("username", user).putString("password_salt", Base64.encodeToString(salt, Base64.NO_WRAP)).putString("password_hash", Base64.encodeToString(hash, Base64.NO_WRAP)).putInt("failed_attempts", 0).apply()
+                hash.fill(0)
+                true
+            } catch (_: Exception) { false }
+        }
+        @JavascriptInterface fun authenticate(username: String, password: String): Boolean {
+            return try {
+                if (prefs.getLong("locked_until", 0L) > System.currentTimeMillis()) return false
+                val expectedUser = prefs.getString("username", null) ?: return false
+                val saltText = prefs.getString("password_salt", null) ?: return false
+                val hashText = prefs.getString("password_hash", null) ?: return false
+                if (!MessageDigest.isEqual(expectedUser.toByteArray(), username.trim().lowercase().toByteArray())) return failed()
+                val actual = derive(password, Base64.decode(saltText, Base64.NO_WRAP))
+                val ok = MessageDigest.isEqual(Base64.decode(hashText, Base64.NO_WRAP), actual)
+                actual.fill(0)
+                if (ok) { prefs.edit().putInt("failed_attempts", 0).putLong("locked_until", 0L).apply(); true } else failed()
+            } catch (_: Exception) { false }
+        }
+        private fun failed(): Boolean {
+            val count = prefs.getInt("failed_attempts", 0) + 1
+            val edit = prefs.edit().putInt("failed_attempts", count)
+            if (count >= 5) edit.putLong("locked_until", System.currentTimeMillis() + 30_000L).putInt("failed_attempts", 0)
+            edit.apply()
+            return false
+        }
+        private fun derive(password: String, salt: ByteArray): ByteArray {
+            val spec = PBEKeySpec(password.toCharArray(), salt, iterations, 256)
+            return try { SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded } finally { spec.clearPassword() }
+        }
     }
 
     private data class PendingExport(
@@ -292,6 +338,7 @@ class MainActivity : AppCompatActivity() {
     override fun onDestroy() {
         filePathCallback?.onReceiveValue(null)
         filePathCallback = null
+        webView.removeJavascriptInterface("NativeAuth")
         webView.removeJavascriptInterface("NativeTemplate")
         webView.removeJavascriptInterface("NativePrint")
         webView.destroy()
