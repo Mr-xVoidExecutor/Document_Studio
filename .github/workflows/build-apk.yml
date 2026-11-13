@@ -30,6 +30,16 @@ jobs:
           test -s app/src/main/assets/css/style.css
           test -s app/src/main/assets/js/template-import.js
           node --check app/src/main/assets/js/template-import.js
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          html = Path("app/src/main/assets/index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r'<script(?![^>]*\\bsrc=)[^>]*>(.*?)</script>', html, re.I | re.S)
+          if len(scripts) != 1:
+              raise SystemExit(f"Expected one inline application script, found {len(scripts)}")
+          Path("/tmp/document-studio-inline.js").write_text(scripts[0], encoding="utf-8")
+          PY
+          node --check /tmp/document-studio-inline.js
           python -m json.tool app/src/main/assets/config/app-config.json > /dev/null
           grep -q 'SAMPLE' app/src/main/assets/index.html
           grep -q 'NativeTemplate' app/src/main/java/com/visastudio/app/MainActivity.kt
