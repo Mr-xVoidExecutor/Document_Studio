@@ -299,9 +299,20 @@
     if (index >= 0) selectWord(index);
   }
   function exportData(dataUrl, filename) {
-    if (window.NativeTemplate && typeof window.NativeTemplate.saveExport === 'function') {
-      const saved = window.NativeTemplate.saveExport(dataUrl, filename);
-      status(saved ? 'Saved to Downloads / Document Studio: ' + saved : 'Could not save file on this device.');
+    if (window.NativeTemplate && typeof window.NativeTemplate.beginExport === 'function') {
+      const mime = dataUrl.slice(0, dataUrl.indexOf(';'));
+      const token = window.NativeTemplate.beginExport(filename, mime.replace('data:', ''));
+      if (!token) { status('Could not start the export on this device.'); return; }
+      const encoded = dataUrl.slice(dataUrl.indexOf(',') + 1);
+      for (let offset = 0; offset < encoded.length; offset += 120000) {
+        if (!window.NativeTemplate.appendExport(token, encoded.slice(offset, offset + 120000))) {
+          window.NativeTemplate.cancelExport(token);
+          status('Export stopped because the file could not be saved.');
+          return;
+        }
+      }
+      const saved = window.NativeTemplate.finishExport(token);
+      status(saved ? 'Saved to Downloads / Document Studio: ' + saved : 'Could not finish saving this file.');
       return;
     }
     const link = document.createElement('a');
