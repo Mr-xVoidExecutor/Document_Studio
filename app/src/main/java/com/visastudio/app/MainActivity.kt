@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity() {
         webView.addJavascriptInterface(TemplateBridge(), "NativeTemplate")
         webView.addJavascriptInterface(AuthBridge(), "NativeAuth")
         webView.addJavascriptInterface(PermissionsBridge(), "NativePermissions")
+        webView.addJavascriptInterface(TelegramBridge(), "NativeTelegram")
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun printDocument() { runOnUiThread { openPrintDialog() } }
@@ -178,6 +179,13 @@ class MainActivity : AppCompatActivity() {
         private fun derive(password: String, salt: ByteArray): ByteArray {
             val spec = PBEKeySpec(password.toCharArray(), salt, iterations, 256)
             return try { SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded } finally { spec.clearPassword() }
+        }
+    }
+
+    private inner class TelegramBridge {
+        @JavascriptInterface
+        fun reportError(source: String, message: String, details: String) {
+            TelegramReporter.report(this@MainActivity, source, message, details)
         }
     }
 
@@ -537,6 +545,7 @@ class MainActivity : AppCompatActivity() {
         webView.removeJavascriptInterface("NativeAuth")
         webView.removeJavascriptInterface("NativeTemplate")
         webView.removeJavascriptInterface("NativePrint")
+        webView.removeJavascriptInterface("NativeTelegram")
         webView.destroy()
         super.onDestroy()
     }
