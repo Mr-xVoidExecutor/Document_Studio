@@ -23,6 +23,13 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
+import org.apache.pdfbox.pdmodel.PDDocument
+import org.apache.pdfbox.text.PDFTextStripper
+import org.apache.pdfbox.text.TextPosition
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -42,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        PDFBoxResourceLoader.init(applicationContext)
         webView = findViewById(R.id.webView)
         webView.settings.apply {
             javaScriptEnabled = true
@@ -283,6 +291,82 @@ class MainActivity : AppCompatActivity() {
                 files.forEach { it.delete() }
                 true
             } catch (_: Exception) { false }
+        }
+
+        @JavascriptInterface
+        fun nativeAnalyzePdf(dataUrl: String, pageIndex: Int): String {
+            return try {
+                val encoded = dataUrl.substringAfter(",", "")
+                if (encoded.isBlank() || encoded.length > 25_000_000) return JSONObject().put("error", "PDF is too large for native analysis (maximum 18 MB).").toString()
+                val bytes = Base64.decode(encoded, Base64.DEFAULT)
+                if (bytes.size < 5 || bytes.size > 18 * 1024 * 1024 || String(bytes, 0, 5, Charsets.US_ASCII) != "%PDF-") {
+                    return JSONObject().put("error", "Invalid PDF or file exceeds the 18 MB native-analysis limit.").toString()
+                }
+                PDDocument.load(ByteArrayInputStream(bytes)).use { document ->
+                    if (document.isEncrypted) return JSONObject().put("error", "Encrypted PDFs are not supported by native analysis yet.").toString()
+                    if (pageIndex !in 0 until document.numberOfPages) return JSONObject().put("error", "Page index is out of range.").toString()
+                    val page = document.getPage(pageIndex)
+                    val positions = mutableListOf<TextPosition>()
+                    val stripper = object : PDFTextStripper() {
+                        init { startPage = pageIndex + 1; endPage = pageIndex + 1 }
+                        override fun processTextPosition(text: TextPosition) {
+                            if (positions.size < 12000) positions.add(text)
+                            super.processTextPosition(text)
+                        }
+                    }
+                    val extracted = stripper.getText(document)
+                    val runs = JSONArray()
+                    var current = JSONObject()
+                    var currentFont = ""
+                    var currentY = Double.NaN
+                    var currentRight = 0.0
+                    for (position in positions) {
+                        val char = position.unicode ?: continue
+                        if (char.isBlank()) continue
+                        val fontName = position.font?.name ?: "Unknown"
+                        val x = position.xDirAdj.toDouble()
+                        val yTop = position.yDirAdj.toDouble()
+                        val width = position.widthDirAdj.toDouble().coerceAtLeast(0.1)
+                        val height = position.heightDir.toDouble().coerceAtLeast(1.0)
+                        val size = position.fontSizeInPt.toDouble().coerceIn(4.0, 144.0)
+                        val sameRun = current.length() > 0 && currentFont == fontName &&
+                            kotlin.math.abs(currentY - yTop) <= maxOf(2.5, size * 0.28) &&
+                            x >= currentRight - size * 0.25 && x <= currentRight + size * 1.8
+                        if (sameRun) {
+                            current.put("text", current.optString("text") + char)
+                            current.put("width", maxOf(currentRight, x + width) - current.optDouble("x"))
+                        } else {
+                            if (current.length() > 0) runs.put(current)
+                            current = JSONObject()
+                                .put("text", char)
+                                .put("x", x)
+                                .put("y", page.mediaBox.height.toDouble() - yTop)
+                                .put("width", width)
+                                .put("height", height)
+                                .put("font", fontName)
+                                .put("size", size)
+                            currentFont = fontName
+                            currentY = yTop
+                        }
+                        currentRight = maxOf(currentRight, x + width)
+                        if (runs.length() >= 800) break
+                    }
+                    if (current.length() > 0 && runs.length() < 800) runs.put(current)
+                    JSONObject()
+                        .put("ok", true)
+                        .put("engine", "Apache PDFBox Android")
+                        .put("pageIndex", pageIndex)
+                        .put("pageCount", document.numberOfPages)
+                        .put("pageWidth", page.mediaBox.width.toDouble())
+                        .put("pageHeight", page.mediaBox.height.toDouble())
+                        .put("characterCount", positions.size)
+                        .put("text", extracted.take(30000))
+                        .put("runs", runs)
+                        .toString()
+                }
+            } catch (error: Exception) {
+                JSONObject().put("error", error.message ?: "Native PDF analysis failed.").toString()
+            }
         }
 
         @JavascriptInterface
