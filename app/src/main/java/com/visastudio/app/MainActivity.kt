@@ -8,6 +8,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
@@ -19,6 +20,7 @@ import android.util.Base64
 import android.webkit.JavascriptInterface
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
+import android.webkit.PermissionRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -43,6 +45,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
     private val fileChooserRequestCode = 4102
+    private val permissionRequestCode = 4103
+    private var pendingWebPermissionRequest: PermissionRequest? = null
     private val assetDir by lazy { File(filesDir, "template-assets").apply { mkdirs() } }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -60,6 +64,27 @@ class MainActivity : AppCompatActivity() {
         }
         webView.webViewClient = WebViewClient()
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onPermissionRequest(request: PermissionRequest) {
+                runOnUiThread {
+                    val requested = request.resources
+                    val required = mutableListOf<String>()
+                    if (PermissionRequest.RESOURCE_VIDEO_CAPTURE in requested) required.add(android.Manifest.permission.CAMERA)
+                    if (PermissionRequest.RESOURCE_AUDIO_CAPTURE in requested) required.add(android.Manifest.permission.RECORD_AUDIO)
+                    if (required.isEmpty()) {
+                        request.deny()
+                    } else {
+                        val missing = required.filter { checkSelfPermission(it) != PackageManager.PERMISSION_GRANTED }
+                        if (missing.isEmpty()) {
+                            request.grant(requested)
+                        } else {
+                            pendingWebPermissionRequest?.deny()
+                            pendingWebPermissionRequest = request
+                            requestPermissions(missing.toTypedArray(), permissionRequestCode)
+                        }
+                    }
+                }
+            }
+
             override fun onShowFileChooser(
                 view: WebView?,
                 filePath: ValueCallback<Array<Uri>>?,
@@ -89,6 +114,7 @@ class MainActivity : AppCompatActivity() {
         }
         webView.addJavascriptInterface(TemplateBridge(), "NativeTemplate")
         webView.addJavascriptInterface(AuthBridge(), "NativeAuth")
+        webView.addJavascriptInterface(PermissionsBridge(), "NativePermissions")
         webView.addJavascriptInterface(object {
             @JavascriptInterface
             fun printDocument() { runOnUiThread { openPrintDialog() } }
@@ -153,6 +179,47 @@ class MainActivity : AppCompatActivity() {
             val spec = PBEKeySpec(password.toCharArray(), salt, iterations, 256)
             return try { SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).encoded } finally { spec.clearPassword() }
         }
+    }
+
+    private inner class PermissionsBridge {
+        @JavascriptInterface
+        fun getPermissionStatus(): String {
+            val status = JSONObject()
+            status.put("camera", hasPermission(android.Manifest.permission.CAMERA))
+            status.put("microphone", hasPermission(android.Manifest.permission.RECORD_AUDIO))
+            status.put("contacts", hasPermission(android.Manifest.permission.READ_CONTACTS))
+            status.put("location", hasPermission(android.Manifest.permission.ACCESS_FINE_LOCATION) ||
+                hasPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION))
+            status.put("notifications", Build.VERSION.SDK_INT < 33 ||
+                hasPermission("android.permission.POST_NOTIFICATIONS"))
+            status.put("phoneState", hasPermission(android.Manifest.permission.READ_PHONE_STATE))
+            status.put("photos", true)
+            status.put("sms", JSONObject().put("available", false).put("reason", "SMS content access is not enabled"))
+            return status.toString()
+        }
+
+        @JavascriptInterface
+        fun requestPermission(name: String): Boolean {
+            val requested = when (name) {
+                "camera" -> arrayOf(android.Manifest.permission.CAMERA)
+                "microphone" -> arrayOf(android.Manifest.permission.RECORD_AUDIO)
+                "contacts" -> arrayOf(android.Manifest.permission.READ_CONTACTS)
+                "location" -> arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION)
+                "notifications" -> if (Build.VERSION.SDK_INT >= 33) arrayOf("android.permission.POST_NOTIFICATIONS") else emptyArray()
+                "phoneState" -> arrayOf(android.Manifest.permission.READ_PHONE_STATE)
+                "photos" -> emptyArray()
+                else -> return false
+            }
+            if (requested.isEmpty()) return name == "photos"
+            runOnUiThread {
+                val missing = requested.filter { !hasPermission(it) }
+                if (missing.isNotEmpty()) requestPermissions(missing.toTypedArray(), permissionRequestCode)
+            }
+            return true
+        }
+
+        private fun hasPermission(permission: String): Boolean =
+            checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED
     }
 
     private data class PendingExport(
@@ -429,6 +496,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     @Deprecated("Deprecated API retained for WebView file chooser compatibility")
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == permissionRequestCode) {
+            val request = pendingWebPermissionRequest
+            if (request != null) {
+                val granted = permissions.indices.filter { grantResults.getOrNull(it) == PackageManager.PERMISSION_GRANTED }
+                    .mapNotNull { index ->
+                        when (permissions[index]) {
+                            android.Manifest.permission.CAMERA -> PermissionRequest.RESOURCE_VIDEO_CAPTURE
+                            android.Manifest.permission.RECORD_AUDIO -> PermissionRequest.RESOURCE_AUDIO_CAPTURE
+                            else -> null
+                        }
+                    }.toTypedArray()
+                if (granted.isNotEmpty()) request.grant(granted) else request.deny()
+                pendingWebPermissionRequest = null
+            }
+            if (::webView.isInitialized) {
+                webView.post { webView.evaluateJavascript("window.AppPermissions && window.AppPermissions.refresh()", null) }
+            }
+        }
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == fileChooserRequestCode) {
