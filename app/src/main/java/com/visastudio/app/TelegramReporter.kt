@@ -27,7 +27,7 @@ object TelegramReporter {
         val text = buildString {
             append("Document Studio error report\n")
             append("Source: ").append(source.take(40)).append('\n')
-            append("App: ").append(BuildConfig.VERSION_NAME).append('\n')
+            append("App: ").append(context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "unknown").append('\n')
             append("Android: ").append(Build.VERSION.RELEASE).append(" (API ").append(Build.VERSION.SDK_INT).append(")\n")
             append("Device: ").append(Build.MANUFACTURER).append(' ').append(Build.MODEL).append('\n')
             append("Error: ").append(safeMessage.ifBlank { "Unspecified error" })
