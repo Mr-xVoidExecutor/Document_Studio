@@ -347,8 +347,9 @@ class MainActivity : AppCompatActivity() {
                                 .put("size", size)
                             currentFont = fontName
                             currentY = yTop
+                            currentRight = x + width
                         }
-                        currentRight = maxOf(currentRight, x + width)
+                        if (sameRun) currentRight = maxOf(currentRight, x + width)
                         if (runs.length() >= 800) break
                     }
                     if (current.length() > 0 && runs.length() < 800) runs.put(current)
