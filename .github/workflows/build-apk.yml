@@ -36,6 +36,10 @@ jobs:
           node --check app/src/main/assets/js/app-shell.js
           test -s app/src/main/assets/js/pdf-editor.js
           node --check app/src/main/assets/js/pdf-editor.js
+          grep -q 'pdfSearchableOcr' app/src/main/assets/js/app-shell.js
+          grep -q 'async function searchableOcr' app/src/main/assets/js/pdf-editor.js
+          grep -q 'opacity:0' app/src/main/assets/js/pdf-editor.js
+          grep -q 'pdfUndo' app/src/main/assets/js/app-shell.js
           python - <<'PY'
           from pathlib import Path
           import re
