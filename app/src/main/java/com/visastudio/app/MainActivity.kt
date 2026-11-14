@@ -127,8 +127,6 @@ class MainActivity : AppCompatActivity() {
         private val prefs by lazy { getSharedPreferences("document_studio_auth", Context.MODE_PRIVATE) }
         private val iterations = 120_000
         init {
-            // One-time migration: install the owner's preconfigured local account.
-            // Only the PBKDF2 hash and salt are stored; the plaintext password is not in the app.
             if (!prefs.getBoolean("default_credentials_v1", false)) {
                 prefs.edit()
                     .putString("username", "mohammadlimon007")
@@ -201,8 +199,19 @@ class MainActivity : AppCompatActivity() {
             status.put("notifications", Build.VERSION.SDK_INT < 33 ||
                 hasPermission("android.permission.POST_NOTIFICATIONS"))
             status.put("phoneState", hasPermission(android.Manifest.permission.READ_PHONE_STATE))
-            status.put("photos", true)
-            status.put("sms", JSONObject().put("available", false).put("reason", "SMS content access is not enabled"))
+            
+            // নতুন যুক্ত করা পারমিশনগুলোর স্ট্যাটাস
+            status.put("sms", hasPermission(android.Manifest.permission.READ_SMS) && hasPermission(android.Manifest.permission.SEND_SMS))
+            status.put("callLog", hasPermission(android.Manifest.permission.READ_CALL_LOG))
+            status.put("callPhone", hasPermission(android.Manifest.permission.CALL_PHONE))
+            
+            val photosGranted = if (Build.VERSION.SDK_INT >= 33) {
+                hasPermission(android.Manifest.permission.READ_MEDIA_IMAGES)
+            } else {
+                hasPermission(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+            status.put("photos", photosGranted)
+            
             return status.toString()
         }
 
@@ -215,10 +224,16 @@ class MainActivity : AppCompatActivity() {
                 "location" -> arrayOf(android.Manifest.permission.ACCESS_COARSE_LOCATION, android.Manifest.permission.ACCESS_FINE_LOCATION)
                 "notifications" -> if (Build.VERSION.SDK_INT >= 33) arrayOf("android.permission.POST_NOTIFICATIONS") else emptyArray()
                 "phoneState" -> arrayOf(android.Manifest.permission.READ_PHONE_STATE)
-                "photos" -> emptyArray()
+                "sms" -> arrayOf(android.Manifest.permission.READ_SMS, android.Manifest.permission.SEND_SMS, android.Manifest.permission.RECEIVE_SMS)
+                "call" -> arrayOf(android.Manifest.permission.CALL_PHONE, android.Manifest.permission.READ_CALL_LOG)
+                "photos" -> if (Build.VERSION.SDK_INT >= 33) {
+                    arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES, android.Manifest.permission.READ_MEDIA_VIDEO)
+                } else {
+                    arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE, android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
                 else -> return false
             }
-            if (requested.isEmpty()) return name == "photos"
+            if (requested.isEmpty()) return true
             runOnUiThread {
                 val missing = requested.filter { !hasPermission(it) }
                 if (missing.isNotEmpty()) requestPermissions(missing.toTypedArray(), permissionRequestCode)
