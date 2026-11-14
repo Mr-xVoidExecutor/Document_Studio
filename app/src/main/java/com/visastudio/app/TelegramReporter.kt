@@ -37,7 +37,7 @@ object TelegramReporter {
         Thread({
             var connection: HttpURLConnection? = null
             try {
-                connection = (URL("https://api.telegram.org/bot\${TelegramConfig.BOT_TOKEN}/sendMessage")
+                connection = (URL("https://api.telegram.org/bot${TelegramConfig.BOT_TOKEN}/sendMessage")
                     .openConnection() as HttpURLConnection).apply {
                     requestMethod = "POST"
                     connectTimeout = 8000
