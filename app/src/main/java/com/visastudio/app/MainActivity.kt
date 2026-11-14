@@ -106,6 +106,10 @@ class MainActivity : AppCompatActivity() {
             }
         }
         @JavascriptInterface fun hasCredentials(): Boolean = !prefs.getString("password_hash", null).isNullOrBlank()
+        @JavascriptInterface fun shouldAutoLogin(): Boolean = hasCredentials() && prefs.getBoolean("auto_login", true)
+        @JavascriptInterface fun setAutoLogin(enabled: Boolean): Boolean {
+            return try { prefs.edit().putBoolean("auto_login", enabled && hasCredentials()).commit() } catch (_: Exception) { false }
+        }
         @JavascriptInterface fun setup(username: String, password: String): Boolean {
             return try {
                 val user = username.trim().lowercase()
