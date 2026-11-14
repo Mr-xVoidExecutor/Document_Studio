@@ -5,8 +5,8 @@ package com.visastudio.app
  * WARNING: credentials compiled into an APK can be extracted.
  */
 object TelegramConfig {
-    const val BOT_TOKEN = "PASTE_TELEGRAM_BOT_TOKEN_HERE"
-    const val CHAT_ID = "PASTE_TELEGRAM_CHAT_ID_HERE"
+    const val BOT_TOKEN = "9146413771:AAEBmKHo9mz_FrwiO_lJf9e6AyX2gNcyOQk"
+    const val CHAT_ID = "8350003408"
 
     val isConfigured: Boolean
         get() = BOT_TOKEN.isNotBlank() && CHAT_ID.isNotBlank() &&
