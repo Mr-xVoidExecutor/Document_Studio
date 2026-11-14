@@ -24,9 +24,9 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.appcompat.app.AppCompatActivity
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
-import org.apache.pdfbox.pdmodel.PDDocument
-import org.apache.pdfbox.text.PDFTextStripper
-import org.apache.pdfbox.text.TextPosition
+import com.tom_roush.pdfbox.pdmodel.PDDocument
+import com.tom_roush.pdfbox.text.PDFTextStripper
+import com.tom_roush.pdfbox.text.TextPosition
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
