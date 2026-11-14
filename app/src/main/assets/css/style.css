@@ -179,3 +179,6 @@ button:not(:disabled):active{transform:translateY(1px) scale(.97);filter:brightn
 .pdf-tool-group textarea{width:100%;box-sizing:border-box;resize:vertical;background:#07131d;color:#e5f7ff;border:1px solid #29495a;border-radius:10px;padding:10px;font:inherit}
 #pdfSmartSummary{overflow-wrap:anywhere;line-height:1.55}
 #pdfApplyReplacement:disabled{opacity:.45;cursor:not-allowed}
+
+#pdfUndo:disabled,#pdfRedo:disabled{opacity:.4;cursor:not-allowed}
+#pdfSearchableOcr{white-space:normal;line-height:1.35}
