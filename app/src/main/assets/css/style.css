@@ -171,3 +171,11 @@ button:not(:disabled):active{transform:translateY(1px) scale(.97);filter:brightn
  .pdf-topbar{padding:10px 13px}
  .pdf-topbar .back,.pdf-topbar .template-primary,.pdf-topbar .template-secondary{min-height:42px}
 }
+
+/* Smart PDF font analysis and OCR workspace */
+.pdf-smart-list{max-height:190px;overflow:auto}
+#pdfTextRegions{width:100%;min-height:116px;background:#07131d;color:#e5f7ff;border:1px solid #29495a;border-radius:10px;padding:8px;font-size:12px}
+#pdfTextRegions option{padding:6px;white-space:normal}
+.pdf-tool-group textarea{width:100%;box-sizing:border-box;resize:vertical;background:#07131d;color:#e5f7ff;border:1px solid #29495a;border-radius:10px;padding:10px;font:inherit}
+#pdfSmartSummary{overflow-wrap:anywhere;line-height:1.55}
+#pdfApplyReplacement:disabled{opacity:.45;cursor:not-allowed}
